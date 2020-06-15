@@ -1,0 +1,37 @@
+
+##############################################
+# Stage 3 : Build tssc-maven 
+##############################################
+FROM quay.io/tssc/tssc-base:latest
+MAINTAINER tbd <nobody@nowhere.com>
+
+# Labels consumed by Red Hat build service
+LABEL com.redhat.component="tssc-ubi8-maven" \
+      name="openshift4/tssc-ubi8-mavenpodm" \
+      architecture="x86_64" \
+      io.k8s.display-name="TSSC Maven" \
+      io.k8s.description="The TSSC Maven image builds on top of the TSSC base image to include java and maven" \
+      io.openshift.tags="openshift,java,maven,python,python3,python36" \
+      maintainer="nobody@nowhere.com"      
+
+USER root
+# Install headless Java
+RUN INSTALL_PKGS="java-11-openjdk-devel java-1.8.0-openjdk-devel maven" && \
+    dnf install -y --setopt=tsflags=nodocs --disableplugin=subscription-manager $INSTALL_PKGS && \
+    rpm -V  $INSTALL_PKGS && \
+    dnf update -y && \
+    dnf clean all && \
+    chmod -R 775 /etc/alternatives && \
+    chmod -R 775 /var/lib/alternatives && \
+    chmod -R 775 /usr/lib/jvm && \
+    chmod 775 /usr/bin && \
+    chmod 775 /usr/share/man/man1 &&\
+    mkdir -p $HOME/.m2
+
+# Copy scripts
+ADD contrib/bin/* /usr/local/bin/
+ADD ./contrib/settings.xml $HOME/.m2/
+
+##############################################
+# End
+##############################################
