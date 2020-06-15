@@ -1,0 +1,48 @@
+##############################################
+# Stage 1 : Retrieive oc cli
+##############################################
+FROM quay.io/openshift/origin-cli as origin-cli
+
+##############################################
+# Stage 3 : Build tssc-base
+##############################################
+FROM registry.access.redhat.com/ubi8:latest
+MAINTAINER tbd <nobody@nowhere.com>
+COPY --from=origin-cli /usr/bin/oc /usr/bin/oc
+COPY --from=origin-cli /usr/bin/kubectl /usr/bin/kubectl
+
+# Labels consumed by Red Hat build service
+LABEL com.redhat.component="tssc-ubi8-base" \
+      name="openshift4/tssc-ubi8-base" \
+      architecture="x86_64" \
+      io.k8s.display-name="TSSC Base Image" \
+      io.k8s.description="TSSC Base image, including python 3.6, and miscellaneous utilities" \
+      io.openshift.tags="openshift,python3,python36" \
+      maintainer="nobody@nowhere.com"
+
+ENV HOME=/home/tssc \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+USER root
+# Install Python 3.6
+RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/bin/jq && \
+    chmod +x /usr/bin/jq && \
+    INSTALL_PKGS="bc gettext git lsof rsync tar unzip which zip bzip2 python36 python3-pip python3-pip-wheel nss_wrapper python3-setuptools python36-devel" && \
+    dnf install -y --setopt=tsflags=nodocs --disableplugin=subscription-manager $INSTALL_PKGS && \
+    alternatives --set python /usr/bin/python3 && \
+    rpm -V  $INSTALL_PKGS && \
+    dnf clean all && \
+    mkdir -p /home/tssc && \
+    chown -R 1001:0 /home/tssc && \
+    chmod -R g+w /home/tssc && \
+    chmod -R 775 /etc/alternatives && \
+    chmod -R 775 /var/lib/alternatives && \
+    chmod 775 /usr/bin && \
+    chmod 775 /usr/share/man/man1 && \
+    mkdir -p /var/lib/origin && \
+    chmod 775 /var/lib/origin
+
+##############################################
+# End
+##############################################
