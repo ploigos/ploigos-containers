@@ -2,7 +2,7 @@ name: tssc-maven-jenkins-agent-publish
 on:
   push:
     branches:
-      - napsspo-395
+      - master
     tags:
       - '*'
     paths:
