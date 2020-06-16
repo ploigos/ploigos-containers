@@ -15,7 +15,7 @@ jobs:
       image_name: tssc-base
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@napsspo-395
+      - uses: actions/checkout@master
       - name: Get image tags
         id: image_tags
         run: |
