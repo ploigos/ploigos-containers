@@ -2,7 +2,7 @@ name: tssc-maven-publish
 on:
   push:
     branches:
-      - napsspo-395
+      - master
     tags:
       - '*'
     paths:
