@@ -3,7 +3,7 @@ name: tssc-base-publish
 on:
   push:
     branches:
-      - master
+      - napsspo-395
     tags:
       - '*'
     paths:
@@ -15,7 +15,7 @@ jobs:
       image_name: tssc-base
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@napsspo-395
       - name: Get image tags
         id: image_tags
         run: |
