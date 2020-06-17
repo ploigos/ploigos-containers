@@ -8,7 +8,7 @@ WORKDIR  /go/src/github.com/openshift/jenkins/go-init
 RUN go build . && cp go-init /usr/bin
 
 ##############################################
-# Stage 3 : Build Maven Jenkins Agent with 
+# Stage 2 : Build Maven Jenkins Agent with 
 #           go-init
 ##############################################
 FROM quay.io/tssc/tssc-maven:latest
@@ -39,6 +39,8 @@ RUN dnf update -y && \
 
 # Copy the entrypoint
 ADD contrib/bin/* /usr/local/bin/
+
+USER 1001
 
 # Run the Jenkins JNLP client
 ENTRYPOINT ["/usr/bin/go-init", "-main", "/usr/local/bin/run-jnlp-client"]

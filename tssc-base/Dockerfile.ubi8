@@ -4,7 +4,7 @@
 FROM quay.io/openshift/origin-cli as origin-cli
 
 ##############################################
-# Stage 3 : Build tssc-base
+# Stage 2 : Build tssc-base
 ##############################################
 FROM registry.access.redhat.com/ubi8:latest
 MAINTAINER tbd <nobody@nowhere.com>
@@ -44,6 +44,7 @@ RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -
     mkdir -p /var/lib/origin && \
     chmod 775 /var/lib/origin
 
+USER 1001
 ##############################################
 # End
 ##############################################
