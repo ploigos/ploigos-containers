@@ -32,6 +32,7 @@ RUN INSTALL_PKGS="java-11-openjdk-devel java-1.8.0-openjdk-devel maven" && \
 ADD contrib/bin/* /usr/local/bin/
 ADD ./contrib/settings.xml $HOME/.m2/
 
+USER 1001
 ##############################################
 # End
 ##############################################
