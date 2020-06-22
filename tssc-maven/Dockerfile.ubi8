@@ -2,8 +2,7 @@
 ##############################################
 # Stage 3 : Build tssc-maven 
 ##############################################
-#FROM quay.io/tssc/tssc-base:latest
-FROM tssc-base:latest
+FROM quay.io/tssc/tssc-base:latest
 MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 
 # Labels consumed by Red Hat build service
