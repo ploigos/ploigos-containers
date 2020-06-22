@@ -25,7 +25,7 @@ jobs:
           tags: ${{ steps.check_version.outputs.IMAGE_TAGS }}
       - name: Test image
         run: |
-          echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client"
-          docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client
-          echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} mvn --version"
-          docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} mvn --version
+          echo "Running: docker run --entrypoint=which ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client"
+          docker run --entrypoint=which ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client
+          echo "Running: docker run --entrypoint=mvn ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} --version"  
+          docker run --entrypoint=mvn ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} --version
