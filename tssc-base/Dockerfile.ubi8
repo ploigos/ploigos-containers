@@ -7,7 +7,7 @@ FROM quay.io/openshift/origin-cli as origin-cli
 # Stage 2 : Build tssc-base
 ##############################################
 FROM registry.access.redhat.com/ubi8:latest
-MAINTAINER Red Hat TSSC <tssc@redhat.com>
+MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 COPY --from=origin-cli /usr/bin/oc /usr/bin/oc
 COPY --from=origin-cli /usr/bin/kubectl /usr/bin/kubectl
 
@@ -18,7 +18,7 @@ LABEL com.redhat.component="tssc-ubi8-base" \
       io.k8s.display-name="TSSC Base Image" \
       io.k8s.description="TSSC Base image, including python 3.6, and miscellaneous utilities" \
       io.openshift.tags="openshift,python3,python36" \
-      maintainer="tssc@redhat.com"
+      maintainer="napsspo+tssc@redhat.com"
 
 ENV HOME=/home/tssc \
     LANG=en_US.UTF-8 \
@@ -36,13 +36,7 @@ RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -
     dnf clean all && \
     mkdir -p /home/tssc && \
     chown -R 1001:0 /home/tssc && \
-    chmod -R g+w /home/tssc && \
-    chmod -R 775 /etc/alternatives && \
-    chmod -R 775 /var/lib/alternatives && \
-    chmod 775 /usr/bin && \
-    chmod 775 /usr/share/man/man1 && \
-    mkdir -p /var/lib/origin && \
-    chmod 775 /var/lib/origin
+    chmod -R g+w /home/tssc 
 
 USER 1001
 ##############################################
