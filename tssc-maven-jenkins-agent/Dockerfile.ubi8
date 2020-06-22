@@ -1,5 +1,4 @@
-#FROM quay.io/tssc/tssc-maven:latest
-FROM tssc-maven:latest
+FROM quay.io/tssc/tssc-maven:latest
 MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 
 # Labels consumed by Red Hat build service
