@@ -21,7 +21,8 @@ RUN INSTALL_PKGS="java-11-openjdk-devel java-1.8.0-openjdk-devel maven" && \
     rpm -V  $INSTALL_PKGS && \
     dnf update -y && \
     dnf clean all && \
-    mkdir -p $HOME/.m2
+    mkdir -p $HOME/.m2 && \
+    chmod 775 $HOME/.m2
 
 # Copy scripts
 ADD contrib/bin/* /usr/local/bin/
