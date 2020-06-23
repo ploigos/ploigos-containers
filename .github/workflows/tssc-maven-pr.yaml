@@ -29,3 +29,6 @@ jobs:
           docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} java -version
           echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} mvn --version"
           docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} mvn --version
+          echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} -u 1001 touch ~/tssc/.m2/test.txt"
+          docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} -u 1001 touch /home/tssc/.m2/test.txt 
+         
