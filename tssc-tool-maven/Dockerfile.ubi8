@@ -1,24 +1,23 @@
-
-##############################################
-# Stage 3 : Build tssc-maven 
-##############################################
-FROM quay.io/tssc/tssc-base:latest
+ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+FROM $FROM_IMAGE 
 MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 
 # Labels consumed by Red Hat build service
 LABEL com.redhat.component="tssc-ubi8-maven" \
-      name="openshift4/tssc-ubi8-mavenpodm" \
+      name="tssc/tssc-ubi8-mavenpodm" \
       architecture="x86_64" \
       io.k8s.display-name="TSSC Maven" \
       io.k8s.description="The TSSC Maven image builds on top of the TSSC base image to include java and maven" \
       io.openshift.tags="openshift,java,maven,python,python3,python36" \
       maintainer="napsspo+tssc@redhat.com"      
 
+ENV MAVEN_OPTS="-Duser.home=$HOME"
+
 USER root
 # Install headless Java
 RUN INSTALL_PKGS="java-11-openjdk-devel java-1.8.0-openjdk-devel maven" && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    rpm -V  $INSTALL_PKGS && \
+    rpm -V $INSTALL_PKGS && \
     dnf update -y && \
     dnf clean all && \
     mkdir -p $HOME/.m2 && \
@@ -29,7 +28,10 @@ ADD contrib/bin/* /usr/local/bin/
 ADD ./contrib/settings.xml $HOME/.m2/
 
 USER 1001
+
+# Configure maven settings
+ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
+
 ##############################################
 # End
 ##############################################
-

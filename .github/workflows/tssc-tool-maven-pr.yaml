@@ -1,13 +1,13 @@
-name: tssc-maven-pr
+name: tssc-tool-maven-pr
 on:
   pull_request:
     paths:
-      - tssc-maven/**
+      - tssc-tool-maven/**
 jobs:
   build:
     env:
-      context: tssc-maven
-      image_name: tssc-maven
+      context: tssc-tool-maven
+      image_name: tssc-tool-maven
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,4 +31,4 @@ jobs:
           docker run -u 1001 ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} mvn --version
           echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} -u 1001 touch ~/tssc/.m2/test.txt"
           docker run -u 1001 ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} touch /home/tssc/.m2/test.txt 
-         
+

@@ -1,4 +1,4 @@
-name: tssc-maven-jenkins-agent-publish
+name: tssc-tool-maven-publish
 on:
   push:
     branches:
@@ -6,12 +6,12 @@ on:
     tags:
       - '*'
     paths:
-      - tssc-maven-jenkins-agent/version.json
+      - tssc-tool-maven/version.json
 jobs:
   build:
     env:
-      context: tssc-maven-jenkins-agent
-      image_name: tssc-maven-jenkins-agent
+      context: tssc-tool-maven
+      image_name: tssc-tool-maven
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
