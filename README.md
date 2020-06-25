@@ -12,7 +12,7 @@ Defines the base TSSC container image, from which all other TSSC images derive.
 Defines a java / maven container image. Built from tssc-base.
 
 ## tssc-ci-agent-jenkins
-[![tssc-ci-agent-jenkins](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-ci-agent-jenkins/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-ci-agent-jenkins)
+[![tssc-ci-agent-jenkins-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-ci-agent-jenkins-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-ci-agent-jenkins)
 
 Defines a jenkins agent as a sidecar for the `tssc-tool-*` containers
 
