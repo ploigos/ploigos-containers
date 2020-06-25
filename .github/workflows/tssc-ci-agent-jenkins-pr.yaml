@@ -1,4 +1,4 @@
-name: tssc-ci-agent-jenkins
+name: tssc-ci-agent-jenkins-pr
 on:
   pull_request:
     paths:
