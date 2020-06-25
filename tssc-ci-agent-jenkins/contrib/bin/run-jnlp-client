@@ -54,9 +54,6 @@ if [[ -z "${SKIP_NO_PROXY_DEFAULT}" || \
 fi
 shopt -u nocasematch
 
-# Configure the slave image
-source /usr/local/bin/configure
-
 set -e
 
 # As of version 1.6.0 of the Jenkins Kubernetes plugin,

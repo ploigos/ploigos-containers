@@ -1,13 +1,13 @@
-name: tssc-maven-jenkins-agent-pr
+name: tssc-ci-agent-jenkins
 on:
   pull_request:
     paths:
-      - tssc-maven-jenkins-agent/**
+      - tssc-ci-agent-jenkins/**
 jobs:
   build:
     env:
-      context: tssc-maven-jenkins-agent
-      image_name: tssc-maven-jenkins-agent
+      context: tssc-ci-agent-jenkins
+      image_name: tssc-ci-agent-jenkins
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,5 +27,3 @@ jobs:
         run: |
           echo "Running: docker run --entrypoint=which ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client"
           docker run --entrypoint=which ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} run-jnlp-client
-          echo "Running: docker run --entrypoint=mvn ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} --version"  
-          docker run --entrypoint=mvn ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} --version

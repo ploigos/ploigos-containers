@@ -3,7 +3,7 @@ name: tssc-base-publish
 on:
   push:
     branches:
-      - master
+      - feature/NAPSSPO-474
     tags:
       - '*'
     paths:
