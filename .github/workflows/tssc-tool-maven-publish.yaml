@@ -2,7 +2,7 @@ name: tssc-tool-maven-publish
 on:
   push:
     branches:
-      - feature/NAPSSPO-474
+      - master
     tags:
       - '*'
     paths:

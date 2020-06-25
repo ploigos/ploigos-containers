@@ -2,7 +2,7 @@ name: tssc-ci-agent-jenkins-publish
 on:
   push:
     branches:
-      - feature/NAPSSPO-474
+      - master
     tags:
       - '*'
     paths:
