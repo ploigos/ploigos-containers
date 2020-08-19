@@ -15,16 +15,20 @@ LABEL com.redhat.component="tssc-tool-sonar" \
 
 USER 0
 
-# Goal: Install sonar files and get $SONAR/bin in the PATH per documentation:
-#    https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/ 
-# Goal: Rename sonar-scanner sonarscanner (removing the dash)
+# Goal: 
+#    Install sonar-scanner for CLI. 
+#    Put $SONAR/bin in the PATH per documentation:
+#        https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/
+# Hint:  
+#    The executable is named sonar-scanner.
+#    In python to execute, substitute the dash with underscore, eg: sh.sonar_scanner()
+#        https://amoffat.github.io/sh/sections/faq.html
 WORKDIR /usr/bin
-RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_CLI}.zip -o sonar.zip \
-&& unzip ./sonar.zip \
-&& rm ./sonar.zip \
-&& chown 1001:0 ./${SONAR} \
-&& mv ./${SONAR} ./sonar \
-&& mv ./sonar/bin/sonar-scanner ./sonar/bin/sonarscanner
+RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_CLI}.zip -o sonar.zip && \
+unzip ./sonar.zip && \
+rm ./sonar.zip && \
+chown 1001:0 ./${SONAR} && \
+mv ./${SONAR} ./sonar
 
 ENV PATH /usr/bin/sonar/bin:$PATH
 
