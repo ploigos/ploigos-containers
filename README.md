@@ -33,6 +33,12 @@ Defines a skopeo container image. Built from tssc-base.
 
 Defines an ArgoCD container image. Built from tssc-base.
 
+## tssc-image-scanner
+[![tssc-tool-image-scanner](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-image-scanner/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-image-scanner)
+
+Defines an OpenSCAP based image scanning container image. Built from tssc-base.
+
+
 # Building locally for testing
 
 The following commands can be used for building these images locally
