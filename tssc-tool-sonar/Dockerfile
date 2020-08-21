@@ -28,14 +28,12 @@ WORKDIR /usr/bin
 RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_CLI}.zip -o sonar.zip && \
 unzip ./sonar.zip && \
 rm ./sonar.zip && \
-chown 1001:0 ./${SONAR} && \
-mv ./${SONAR} ./sonar
+mv ./${SONAR} ./sonar && \
+chown -R 1001:0 /usr/bin/sonar
 
 ENV PATH /usr/bin/sonar/bin:$PATH
 
 USER 1001
-
-ENTRYPOINT [ "/usr/bin/sonar" ]
 
 ##############################################
 # End
