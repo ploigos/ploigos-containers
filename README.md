@@ -33,6 +33,12 @@ Defines a skopeo container image. Built from tssc-base.
 
 Defines an ArgoCD container image. Built from tssc-base.
 
+## tssc-tool-sonar
+[![tssc-tool-sonar-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-sonar-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-sonar)
+
+Defines a sonar-scanner container image. Built from tssc-base.
+
+
 # Building locally for testing
 
 The following commands can be used for building these images locally
