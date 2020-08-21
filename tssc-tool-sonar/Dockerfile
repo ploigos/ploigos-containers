@@ -1,8 +1,9 @@
+ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+FROM $FROM_IMAGE
+
 ARG SONAR_CLI=sonar-scanner-cli-4.4.0.2170-linux
 ARG SONAR=sonar-scanner-4.4.0.2170-linux
 
-ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
-FROM $FROM_IMAGE
 MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 
 LABEL com.redhat.component="tssc-tool-sonar" \
