@@ -1,4 +1,4 @@
-ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+ARG FROM_IMAGE=quay.io/tssc/tssc-base-java-8:latest
 
 FROM $FROM_IMAGE
 MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
@@ -22,13 +22,7 @@ USER root
 ADD contrib/bin/* /usr/local/bin/
 
 # Install jenkins agent
-RUN INSTALL_PKGS="java-11-openjdk-devel java-1.8.0-openjdk-devel" && \
-    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
-    dnf update -y && \
-    dnf clean all && \
-    # Following 9 lines are requred for run-jnlp-client
-    chmod -R 775 /etc/alternatives && \
+RUN INSTALL_PKGS="chmod -R 775 /etc/alternatives && \
     chmod -R 775 /var/lib/alternatives && \
     chmod 775 /usr/bin && \
     chmod 775 /usr/share/man/man1 && \
