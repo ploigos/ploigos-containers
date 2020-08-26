@@ -11,8 +11,6 @@ LABEL com.redhat.component="tssc-base-java-8" \
       io.openshift.tags="openshift,java,python,python3,python36" \
       maintainer="napsspo+tssc@redhat.com"      
 
-ENV MAVEN_OPTS="-Duser.home=$HOME"
-
 USER root
 # Install headless Java
 RUN INSTALL_PKGS="java-1.8.0-openjdk-devel" && \
