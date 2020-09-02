@@ -16,6 +16,11 @@ Defines a Java 8 base container image, built on top of `tssc-base`, from which m
 
 Defines a jenkins agent as a sidecar for the `tssc-tool-*` containers. Built from `tssc-base-java-8`.
 
+## tssc-tool-argocd
+[![tssc-tool-argocd-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-argocd-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-argocd)
+
+Defines an ArgoCD container image. Built from `tssc-base`.
+
 ## tssc-tool-buildah
 [tssc-tool-buildah | Manual Build](https://quay.io/repository/tssc/tssc-tool-buildah)
 
@@ -28,21 +33,20 @@ Defines a buildah container image. Built from `tssc-base`.
 
 Defines a maven container image. Built from `tssc-base-java-8`.
 
+## tssc-tool-selenium
+[![tssc-tool-selenium-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-selenium-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-selenium)
+
+Defines a selenium container image with Chrome webdriver. Built from `tssc-tool-maven`.
+
 ## tssc-tool-skopeo
 [![tssc-tool-skopeo-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-skopeo-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-skopeo)
 
 Defines a skopeo container image. Built from `tssc-base`.
 
-## tssc-tool-argocd
-[![tssc-tool-argocd-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-argocd-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-argocd)
-
-Defines an ArgoCD container image. Built from `tssc-base`.
-
 ## tssc-tool-sonar
 [![tssc-tool-sonar-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-sonar-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-sonar)
 
 Defines a sonar-scanner container image. Built from `tssc-base`.
-
 
 # Building locally for testing
 
