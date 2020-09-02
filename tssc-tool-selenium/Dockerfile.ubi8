@@ -131,6 +131,11 @@ RUN /opt/bin/generate_config > /opt/selenium/config.json
 RUN /opt/bin/generate_chrome_config > /opt/selenium_node/config.json
 
 #################################
+# Copy test script to container #
+#################################
+COPY contrib/test.sh /home/tssc/
+
+#################################
 # Expose Ports for Hub and Node #
 #################################
 EXPOSE 4444
