@@ -1,12 +1,12 @@
-# TSSC image-scanner Image
+# TSSC OpenSCAP Image
 
-This repository contains the Dockerfile and supporting files for creating the image-scanner TSSC image.
+This repository contains the Dockerfile and supporting files for creating the OpenSCAP TSSC image.
 
 To build and push this image perform the following on a properly subscribed RHEL 8 host:
 ```
 podman login quay.io
-podman build . -t quay.io/tssc/tssc-tool-image-scanner:latest
-podman push quay.io/quay_org/tssc-tool-image-scanner:latest
+podman build . -t quay.io/tssc/tssc-tool-openscap:latest
+podman push quay.io/quay_org/tssc-tool-openscap:latest
 ```
 
 Test:
@@ -15,7 +15,7 @@ Test:
 export container_image_url=quay.io/tssc/tssc-reference-app-quarkus-tssc
 export container_image_tag=1.0.2-feature_napsspo-535
 
-podman run --rm quay.io/tssc/tssc-tool-image-scanner:latest /bin/bash -c "
+podman run --rm quay.io/tssc/tssc-tool-openscap:latest /bin/bash -c "
     echo -en \"Pulling image $container_image_url:$container_image_tag\n\n\";
     buildah from --storage-driver vfs --log-level debug docker://$container_image_url:$container_image_tag;
     container_id=$(buildah --storage-driver vfs containers -q);
