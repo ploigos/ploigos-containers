@@ -19,7 +19,7 @@ Defines a jenkins agent as a sidecar for the `tssc-tool-*` containers. Built fro
 ## tssc-tool-buildah
 [tssc-tool-buildah | Manual Build](https://quay.io/repository/tssc/tssc-tool-buildah)
 
-> **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine recently.
+> **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
 
 Defines a buildah container image. Built from `tssc-base`.
 
@@ -42,6 +42,15 @@ Defines an ArgoCD container image. Built from `tssc-base`.
 [![tssc-tool-sonar-publish](https://github.com/rhtconsulting/tssc-containers/workflows/tssc-tool-sonar-publish/badge.svg?branch=master)](https://quay.io/repository/tssc/tssc-tool-sonar)
 
 Defines a sonar-scanner container image. Built from `tssc-base`.
+
+
+## tssc-openscap
+
+[tssc-tool-openscap | Manual Build](https://quay.io/repository/tssc/tssc-tool-openscap)
+
+> **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
+
+Defines an OpenSCAP based image scanning container image. Built from tssc-base.
 
 
 # Building locally for testing
