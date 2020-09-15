@@ -33,3 +33,5 @@ jobs:
           docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} oc version
           echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} git version"
           docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} git version
+          echo "Running: docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} sops --version"
+          docker run ${image_name}:${{ steps.check_version.outputs.IMAGE_TAGS }} sops --version
