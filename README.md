@@ -100,7 +100,7 @@ podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-argocd tssc-tool-a
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-buildah tssc-tool-buildah
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-config-lint tssc-tool-config-lint
 podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-tool-maven tssc-tool-maven
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-openscap tssc-tool-openscap
+podman build --build-arg FROM_IMAGE=tssc-tool-buildah --tag tssc-tool-openscap tssc-tool-openscap
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-skopeo tssc-tool-skopeo
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-sonar
 ```
@@ -108,6 +108,53 @@ podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-so
 
 > **TODO**
 
-# Publish
+## Publish
+Steps for manually publishing the images that need to be manually published.
 
-> **TODO**
+* tssc-tool-buildah
+* tssc-tool-openscap
+
+### Setup
+Setup steps.
+```
+yum -y install podman, buildah
+```
+
+### Publish edge
+
+#### Publish to quay.io/tssc
+```
+./manual-publish.sh
+```
+or
+```
+./manual-publish.sh edge tssc
+```
+or	
+```
+./manual-publish.sh edge tssc quay.io
+```
+
+#### Publish to personal quay.io repo
+```
+./manual-publish.sh edge $QUAY_USER_NAME
+```
+or
+```
+./manual-publish.sh edge $QUAY_USER_NAME quay.io
+```
+
+### Pubish release verson
+
+#### Publish the v1.0.0 release version to quay.io/tssc
+```
+./manual-publish.sh v1.0.0
+```
+
+# How to Release?
+
+1. tag this repository with the release version
+   * ex: `v1.42.0`
+   * __NOTE__: must start with `v`
+2. manually publish the images that can't be automatically published
+   * ex: `./manual-publish.sh v1.42.0 tssc quay.io`
