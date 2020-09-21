@@ -750,12 +750,12 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} java -version"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
-          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} mvn --version"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} mvn --version
-          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} -u 1001 touch ~/tssc/.m2/test.txt"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} touch /home/tssc/.m2/test.txt
+          echo "Verify java installed"
+          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "java -version"
+          echo "Verify maven installed"
+          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mvn --version"
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2; touch ~/.m2/test-settings.xml"
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1

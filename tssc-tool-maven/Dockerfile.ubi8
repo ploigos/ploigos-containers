@@ -1,6 +1,7 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base-java-8:latest
+
 FROM $FROM_IMAGE 
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
+ARG TSSC_USER_UID
 
 # Labels consumed by Red Hat build service
 LABEL com.redhat.component="tssc-ubi8-maven" \
@@ -19,15 +20,12 @@ RUN INSTALL_PKGS="maven" && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     dnf update -y && \
-    dnf clean all && \
-    mkdir -p $HOME/.m2 && \
-    chmod 775 $HOME/.m2
+    dnf clean all
 
 # Copy scripts
 ADD contrib/bin/* /usr/local/bin/
-ADD ./contrib/settings.xml $HOME/.m2/
 
-USER 1001
+USER $TSSC_USER_UID
 
 # Configure maven settings
 ENTRYPOINT [ "/usr/local/bin/entrypoint" ]

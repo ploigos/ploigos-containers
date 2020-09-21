@@ -1,10 +1,9 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
-FROM $FROM_IMAGE
 
+FROM $FROM_IMAGE
+ARG TSSC_USER_UID
 ARG SONAR_CLI=sonar-scanner-cli-4.4.0.2170-linux
 ARG SONAR=sonar-scanner-4.4.0.2170-linux
-
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
 
 LABEL com.redhat.component="tssc-tool-sonar" \
       name="tssc/tssc-tool-sonar" \
@@ -33,7 +32,7 @@ chown -R 1001:0 /usr/bin/sonar
 
 ENV PATH /usr/bin/sonar/bin:$PATH
 
-USER 1001
+USER $TSSC_USER_UID
 
 ##############################################
 # End

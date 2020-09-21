@@ -1,7 +1,7 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
-FROM $FROM_IMAGE
 
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
+FROM $FROM_IMAGE
+ARG TSSC_USER_UID
 
 LABEL architecture="x86_64" \
       com.redhat.component="tssc-tool-config-lint" \
@@ -20,7 +20,7 @@ rm ./config-lint.tar.gz && \
 chmod 775 ./config-lint && \
 chown 1001:0 ./config-lint
 
-USER 1001
+USER $TSSC_USER_UID
 
 ##############################################
 # End

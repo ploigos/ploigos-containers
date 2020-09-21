@@ -1,6 +1,7 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+
 FROM $FROM_IMAGE 
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
+ARG TSSC_USER_UID
 
 # Labels consumed by Red Hat build service
 LABEL com.redhat.component="tssc-base-java-8" \
@@ -19,7 +20,7 @@ RUN INSTALL_PKGS="java-1.8.0-openjdk-devel" && \
     dnf update -y && \
     dnf clean all
 
-USER 1001
+USER $TSSC_USER_UID
 
 ##############################################
 # End

@@ -1,8 +1,9 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+
 FROM quay.io/skopeo/stable:latest as skopeoimage
 
 FROM $FROM_IMAGE
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
+ARG TSSC_USER_UID
 
 LABEL com.redhat.component="tssc-tool-skopeo" \
       name="tssc/tssc-tool-skopeo" \
@@ -24,7 +25,7 @@ RUN chmod 775 /etc/containers/ && \
     chmod 664 /etc/containers/* && \
     chown -R 1001:0 /etc/containers/
 
-USER 1001
+USER $TSSC_USER_UID
 
 ENTRYPOINT [ "/usr/bin/skopeo" ]
 
