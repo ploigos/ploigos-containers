@@ -1,6 +1,6 @@
 # tssc-containers
 ![license](https://img.shields.io/github/license/rhtconsulting/tssc-containers)
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/tssc-containers/publish/master?label=publish%3A%20edge&logo=open-containers-initiative)](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish+branch%3Amaster)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/tssc-containers/publish/main?label=publish%3A%20edge&logo=open-containers-initiative)](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish+branch%3Amain)
 
 Container image definitions for the TSSC project
 
@@ -69,7 +69,7 @@ to kick off which will build, test, publish the images (that can) to [quay.io/ts
   - everyday at 10:00am
 * push
   - branches
-    * `master`
+    * `main`
   - tags
     * `v*.*.*`
   - pull_request
