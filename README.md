@@ -1,5 +1,5 @@
 # tssc-containers
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/tssc-containers/publish/main?label=publish%3A%20edge&logo=open-containers-initiative)](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish+branch%3Amain)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/tssc-containers/publish/main?label=publish%3A%20edge&logo=github-actions)](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish+branch%3Amain)
 <br />
 [![license](https://img.shields.io/github/license/rhtconsulting/tssc-containers)](LICENSE)
 
