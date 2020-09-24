@@ -10,7 +10,7 @@ build_tag_push() {
     FROM_IMAGE_NAME=$2
 
     echo BUILD: ${IMAGE_NAME}
-    podman build --build-arg FROM_IMAGE=${REGISTRY_URI}/${REGISTRY_REPOSITORY}/${FROM_IMAGE_NAME}:${IMAGE_VERSION} --tag ${IMAGE_NAME} ${IMAGE_NAME}
+    podman build --build-arg FROM_IMAGE=${REGISTRY_URI}/${REGISTRY_REPOSITORY}/${FROM_IMAGE_NAME}:${IMAGE_VERSION} --tag ${IMAGE_NAME} --pull-always ${IMAGE_NAME}
 
     for IMAGE_TAG in ${IMAGE_TAGS}; do
         FULL_TAG="${REGISTRY_URI}/${REGISTRY_REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
