@@ -1,6 +1,7 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-tool-buildah:latest
+
 FROM $FROM_IMAGE
-MAINTAINER Red Hat TSSC <napsspo+tssc@redhat.com>
+ARG TSSC_USER_UID
 
 LABEL com.redhat.component="tssc-tool-image-scanner" \
       name="tssc/tssc-tool-image-scanner" \
@@ -14,7 +15,3 @@ LABEL com.redhat.component="tssc-tool-image-scanner" \
 ENV INSTALL_PKGS="scap-security-guide openscap-scanner"
 RUN dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
     && dnf clean all --enablerepo=\*
-
-# ENV LC_ALL=
-
-# CMD [ "/usr/bin/oscap-chroot" ]
