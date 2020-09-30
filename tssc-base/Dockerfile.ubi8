@@ -3,6 +3,7 @@ ARG TSSC_USER_NAME=tssc
 ARG TSSC_USER_UID=1001
 ARG TSSC_USER_GID=0
 ARG TSSC_HOME_DIR=/home/tssc
+ARG TSSC_SOURCE=git+https://github.com/rhtconsulting/tssc-python-package.git@main
 
 ##############################################
 # Stage 1 : Retrieive oc cli
@@ -17,6 +18,7 @@ ARG TSSC_USER_NAME
 ARG TSSC_USER_UID
 ARG TSSC_USER_GID
 ARG TSSC_HOME_DIR
+ARG TSSC_SOURCE
 COPY --from=origin-cli /usr/bin/oc /usr/bin/oc
 COPY --from=origin-cli /usr/bin/kubectl /usr/bin/kubectl
 
@@ -52,7 +54,10 @@ RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-p
 
 # Configure Python
 RUN alternatives --set python /usr/bin/python3 && \
-    python -m pip install --upgrade pip
+    python -m pip install --no-cache-dir --upgrade pip
+
+# Install TSSC python library
+RUN pip install --no-cache-dir --upgrade ${TSSC_SOURCE}
 
 # Configure tssc user
 RUN useradd tssc --uid $TSSC_USER_UID --gid $TSSC_USER_GID --home-dir ${TSSC_HOME_DIR} --create-home --shell /sbin/nologin && \
