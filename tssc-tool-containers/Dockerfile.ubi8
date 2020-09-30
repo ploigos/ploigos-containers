@@ -7,13 +7,13 @@ FROM $FROM_IMAGE
 ARG TSSC_USER_UID
 
 LABEL maintainer="napsspo+tssc@redhat.com" \
-      name="tssc/tssc-tool-buildah" \
+      name="tssc/tssc-tool-containers" \
       architecture="x86_64" \
-      io.k8s.display-name="TSSC Buildah" \
-      io.k8s.description="The TSSC Buildah image builds on top of the TSSC base image to include buildah" \
-      io.openshift.tags="openshift,buildah,python,python3,python36" \
-      summary="A command line tool used for creating OCI Images" \
-      description="The buildah container provides a command line tool which can be used to create a working container from scratch or to create a working container from an image as a starting point. Also to mount/umount a working container's root file system for manipulation, save container's root file system layer to create a new image and delete a working container or an image"
+      io.k8s.display-name="tssc-tool-containers" \
+      io.k8s.description="TSSC tools container that has tools for working with containers." \
+      io.openshift.tags="openshift,buildah,podman,skopeo,python,python3,python36" \
+      summary="TSSC tools container that has tools for working with containers." \
+      description="Includes buildah, podman, and skopeo"
 
 # NOTE This image must run priviliged
 USER 0
@@ -21,7 +21,11 @@ USER 0
 # Don't include container-selinux and remove
 # directories used by yum that are just taking
 # up space.
-RUN dnf -y module enable container-tools:rhel8; dnf -y update; dnf -y reinstall shadow-utils; dnf -y install buildah fuse-overlayfs /etc/containers/storage.conf; rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+RUN dnf -y module enable container-tools:rhel8; \
+    dnf -y update; \
+    dnf -y reinstall shadow-utils; \
+    dnf -y install buildah podman skopeo fuse-overlayfs /etc/containers/storage.conf; \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
 # Adjust storage.conf to enable Fuse storage.
 RUN sed -i -e 's|^#mount_program|mount_program|g' -e '/additionalimage.*/a "/var/lib/shared",' /etc/containers/storage.conf

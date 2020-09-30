@@ -25,12 +25,15 @@ Defines a jenkins agent as a sidecar for the `tssc-tool-*` containers. Built fro
 
 Defines an ArgoCD container image. Built from `tssc-base`.
 
-## tssc-tool-buildah
-[![tssc-tool-buildah](https://img.shields.io/badge/quay.io-tssc--tool--buildah-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-buildah)
+## tssc-tool-containers
+[![tssc-tool-containers](https://img.shields.io/badge/quay.io-tssc--tool--containers-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-containers)
 
 > **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
 
-Defines a buildah container image. Built from `tssc-base`.
+Defines a ci tools container that has tools for working with containers.
+* buildah
+* podman
+* skopeo
 
 ## tssc-tool-config-lint
 [![tssc-tool-config-lint](https://img.shields.io/badge/quay.io-tssc--tool--config--lint-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-config-lint)
@@ -99,10 +102,10 @@ podman build --tag tssc-base tssc-base
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-base-java-8 tssc-base-java-8
 podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-ci-agent-jenkins tssc-ci-agent-jenkins
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-argocd tssc-tool-argocd
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-buildah tssc-tool-buildah
+podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-containers tssc-tool-containers
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-config-lint tssc-tool-config-lint
 podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-tool-maven tssc-tool-maven
-podman build --build-arg FROM_IMAGE=tssc-tool-buildah --tag tssc-tool-openscap tssc-tool-openscap
+podman build --build-arg FROM_IMAGE=tssc-tool-containers --tag tssc-tool-openscap tssc-tool-openscap
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-skopeo tssc-tool-skopeo
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-sonar
 ```
@@ -113,7 +116,7 @@ podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-so
 ## Publish
 Steps for manually publishing the images that need to be manually published.
 
-* tssc-tool-buildah
+* tssc-tool-containers
 * tssc-tool-openscap
 
 ### Setup
@@ -160,3 +163,4 @@ or
    * __NOTE__: must start with `v`
 2. manually publish the images that can't be automatically published
    * ex: `./manual-publish.sh v1.42.0 tssc quay.io`
+

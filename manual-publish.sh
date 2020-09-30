@@ -64,7 +64,7 @@ echo
 echo --------------------
 echo
 echo CONFIRMATION
-echo "    IMAGES: tssc-tool-buildah tssc-tool-openscap"
+echo "    IMAGES: tssc-tool-containers tssc-tool-openscap"
 echo "    IMAGE VERSION: ${IMAGE_VERSION}"
 echo "    IMAGE TAGS: ${IMAGE_TAGS}"
 echo "    REGISTRY REPOSITORY: ${REGISTRY_REPOSITORY}"
@@ -76,13 +76,13 @@ if ! [[ $REPLY =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-#####################
-# tssc-tool-buildah #
-#####################
+########################
+# tssc-tool-containers #
+########################
 echo
 echo --------------------
 echo
-IMAGE_NAME=tssc-tool-buildah
+IMAGE_NAME=tssc-tool-containers
 FROM_IMAGE_NAME=tssc-base
 build_tag_push ${IMAGE_NAME} ${FROM_IMAGE_NAME}
 
@@ -93,6 +93,6 @@ echo
 echo --------------------
 echo
 IMAGE_NAME=tssc-tool-openscap
-FROM_IMAGE_NAME=tssc-tool-buildah
+FROM_IMAGE_NAME=tssc-tool-containers
 build_tag_push ${IMAGE_NAME} ${FROM_IMAGE_NAME}
 
