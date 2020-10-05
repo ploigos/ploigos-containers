@@ -99,6 +99,7 @@ The following commands can be used for building these images locally
 # Run these commands from the directory where this repository was cloned
 
 podman build --tag tssc-base tssc-base
+podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-helm tssc-tool-helm
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-base-java-8 tssc-base-java-8
 podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-ci-agent-jenkins tssc-ci-agent-jenkins
 podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-argocd tssc-tool-argocd
@@ -135,7 +136,7 @@ or
 ```
 ./manual-publish.sh edge tssc
 ```
-or	
+or
 ```
 ./manual-publish.sh edge tssc quay.io
 ```
