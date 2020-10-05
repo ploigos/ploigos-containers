@@ -1,0 +1,28 @@
+ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
+ARG HELM_VERSION=v3.3.4
+
+FROM $FROM_IMAGE
+ARG TSSC_USER_UID
+ARG HELM_VERSION
+
+LABEL com.redhat.component="tssc-tool-helm" \
+      name="tssc/tssc-tool-helm" \
+      architecture="x86_64" \
+      io.k8s.display-name="TSSC helm" \
+      io.k8s.description="Provides the helm executable" \
+      io.openshift.tags="openshift,helm,python,python3,python36" \
+      maintainer="napsspo+tssc@redhat.com"
+
+USER 0
+
+# download HELM and install in /usr/local/bin
+RUN curl -L https://get.helm.sh/helm-$HELM_VERSION-linux-amd64.tar.gz -o helm-$HELM_VERSION-linux-amd64.tar.gz && \
+    tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin/helm
+
+# install the sops plugin for helm
+RUN helm plugin install https://github.com/zendesk/helm-secrets
+
+USER $TSSC_USER_UID
+
+ENTRYPOINT [ "/usr/local/bin/helm" ]
