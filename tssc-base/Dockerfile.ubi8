@@ -46,7 +46,7 @@ RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -
     chmod +x /usr/bin/jq
 
 # Install packages
-RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-pip python3-pip-wheel python3-setuptools python36-devel ${SOPS_RPM}" && \
+RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-pip python3-pip-wheel python3-setuptools python36-devel ${SOPS_RPM} gnupg2" && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     dnf update -y && \
     rpm -V $INSTALL_PKGS && \

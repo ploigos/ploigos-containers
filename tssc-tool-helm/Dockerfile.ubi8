@@ -1,9 +1,14 @@
 ARG FROM_IMAGE=quay.io/tssc/tssc-base:latest
-ARG HELM_VERSION=v3.3.4
 
-FROM $FROM_IMAGE
+ARG HELM_PLUGINS_DIR=/helm/plugins
+ARG HELM_VERSION=v3.3.4
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION=v2.0.2
+
+FROM ${FROM_IMAGE}
 ARG TSSC_USER_UID
 ARG HELM_VERSION
+ARG HELM_PLUGINS_DIR
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION
 
 LABEL com.redhat.component="tssc-tool-helm" \
       name="tssc/tssc-tool-helm" \
@@ -16,13 +21,21 @@ LABEL com.redhat.component="tssc-tool-helm" \
 USER 0
 
 # download HELM and install in /usr/local/bin
-RUN curl -L https://get.helm.sh/helm-$HELM_VERSION-linux-amd64.tar.gz -o helm-$HELM_VERSION-linux-amd64.tar.gz && \
-    tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz && \
-    mv linux-amd64/helm /usr/local/bin/helm
+RUN curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o helm-${HELM_VERSION}-linux-amd64.tar.gz \
+    && tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz \
+    && mv linux-amd64/helm /usr/local/bin/helm
 
 # install the sops plugin for helm
-RUN helm plugin install https://github.com/zendesk/helm-secrets
+# NOTE: the trick of setting and unsetting XDG_DATA_HOME seems to be documented no where but
+#	also seems to be the only way to get the plugins to actually install in the right playce
+#	Found trick here: https://jenkins-x.io/community/labs/enhancements/proposals/4/readme/#231-quick-and-dirty-implementation
+RUN mkdir -p ${HELM_PLUGINS_DIR} && \
+    chmod a+rwx ${HELM_PLUGINS_DIR}
+ENV HELM_PLUGINS=${HELM_PLUGINS_DIR}
+RUN export XDG_DATA_HOME="/" \
+    && helm plugin install https://github.com/zendesk/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
+    && unset XDG_DATA_HOME
 
-USER $TSSC_USER_UID
+USER ${TSSC_USER_UID}
 
 ENTRYPOINT [ "/usr/local/bin/helm" ]
