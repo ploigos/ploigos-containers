@@ -756,8 +756,14 @@ jobs:
           echo "Check helm version (this value needs to be updated if default value in container is updated)"
           docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} version
 
+          echo "Check helm-secrets plugin is installed in expected location"
+          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "ls /helm/plugins/helm-secrets"
+
           echo "Check that helm-secrets plugin is installed"
           docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} secrets --help
+
+          echo "Check that helm-secrets plugin is installed when running as random user"
+          docker run -u 10010042 ${{ env.IMAGE_TAG_LOCAL }} secrets --help
 
           echo "Check that sops is installed"
           docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "sops --version"
