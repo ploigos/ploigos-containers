@@ -57,7 +57,7 @@ RUN alternatives --set python /usr/bin/python3 && \
     python -m pip install --no-cache-dir --upgrade pip
 
 # Install TSSC python library
-RUN pip install --no-cache-dir --upgrade ${TSSC_SOURCE}
+RUN python -m pip install --no-cache-dir --upgrade ${TSSC_SOURCE}
 
 # Configure tssc user
 RUN useradd tssc --uid $TSSC_USER_UID --gid $TSSC_USER_GID --home-dir ${TSSC_HOME_DIR} --create-home --shell /sbin/nologin && \
