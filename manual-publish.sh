@@ -16,7 +16,7 @@ build_tag_push() {
         FULL_TAG="${REGISTRY_URI}/${REGISTRY_REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
         echo "TAG: ${FULL_TAG}"
         buildah tag localhost/${IMAGE_NAME} ${FULL_TAG}
-    
+
         echo "PUSH: ${FULL_TAG}"
         buildah push ${FULL_TAG}
     done
@@ -29,7 +29,7 @@ else
 fi
 
 if [ -z "$2" ]; then
-    REGISTRY_REPOSITORY='tssc'
+    REGISTRY_REPOSITORY='ploigos'
 else
     REGISTRY_REPOSITORY=$2
 fi
@@ -64,7 +64,7 @@ echo
 echo --------------------
 echo
 echo CONFIRMATION
-echo "    IMAGES: tssc-tool-containers tssc-tool-openscap"
+echo "    IMAGES: ploigos-tool-containers ploigos-tool-openscap"
 echo "    IMAGE VERSION: ${IMAGE_VERSION}"
 echo "    IMAGE TAGS: ${IMAGE_TAGS}"
 echo "    REGISTRY REPOSITORY: ${REGISTRY_REPOSITORY}"
@@ -76,23 +76,23 @@ if ! [[ $REPLY =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-########################
-# tssc-tool-containers #
-########################
+###########################
+# ploigos-tool-containers #
+###########################
 echo
 echo --------------------
 echo
-IMAGE_NAME=tssc-tool-containers
-FROM_IMAGE_NAME=tssc-base
+IMAGE_NAME=ploigos-tool-containers
+FROM_IMAGE_NAME=ploigos-base
 build_tag_push ${IMAGE_NAME} ${FROM_IMAGE_NAME}
 
-######################
-# tssc-tool-openscap #
-######################
+#########################
+# ploigos-tool-openscap #
+#########################
 echo
 echo --------------------
 echo
-IMAGE_NAME=tssc-tool-openscap
-FROM_IMAGE_NAME=tssc-tool-containers
+IMAGE_NAME=ploigos-tool-openscap
+FROM_IMAGE_NAME=ploigos-tool-containers
 build_tag_push ${IMAGE_NAME} ${FROM_IMAGE_NAME}
 
