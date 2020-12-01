@@ -1,0 +1,29 @@
+ARG FROM_IMAGE=quay.io/ploigos/ploigos-base:latest
+
+FROM $FROM_IMAGE
+ARG PLOIGOS_USER_UID
+
+LABEL com.redhat.component="ploigos-tool-argocd" \
+      name="ploigos/ploigos-tool-argocd" \
+      architecture="x86_64" \
+      io.k8s.display-name="Ploigos argocd" \
+      io.k8s.description="The Ploigos argocd image provides the argocd executable" \
+      io.openshift.tags="ploigos,openshift,argocd,python,python3,python36" \
+      maintainer="napsspo+ploigos@redhat.com"
+
+USER 0
+
+# TODO: Currently (7/29/2020) podman does not support passing arguments into environment variables
+#       see https://github.com/containers/buildah/issues/2345
+#       Once this is resolved, store the path to the argocd cli in argument so it can be overwritten
+#		without rebuilding the image.
+RUN curl -L https://github.com/argoproj/argo-cd/releases/download/v1.6.1/argocd-linux-amd64 -o /usr/bin/argocd && \
+    chmod 775 /usr/bin/argocd && chown 1001:0 /usr/bin/argocd
+
+USER $PLOIGOS_USER_UID
+
+ENTRYPOINT [ "/usr/bin/argocd" ]
+
+##############################################
+# End
+##############################################

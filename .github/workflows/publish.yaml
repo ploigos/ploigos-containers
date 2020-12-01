@@ -19,20 +19,20 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  #############
-  # tssc-base #
-  #############
-  tssc-base:
+  ################
+  # ploigos-base #
+  ################
+  ploigos-base:
     needs:
     - cancel-previous
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-base
+      IMAGE_CONTEXT: ./ploigos-base
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-base
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-base:latest
+      IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest
 
     services:
       registry:
@@ -149,21 +149,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ####################
-  # tssc-base-java-8 #
-  ####################
-  tssc-base-java-8:
+  #######################
+  # ploigos-base-java-8 #
+  #######################
+  ploigos-base-java-8:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-base-java-8
+      IMAGE_CONTEXT: ./ploigos-base-java-8
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-base-java-8
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-base-java-8:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-base-java-8
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base-java-8:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -274,21 +274,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  #########################
-  # tssc-ci-agent-jenkins #
-  #########################
-  tssc-ci-agent-jenkins:
+  ############################
+  # ploigos-ci-agent-jenkins #
+  ############################
+  ploigos-ci-agent-jenkins:
     needs:
-    - tssc-base-java-8
+    - ploigos-base-java-8
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-ci-agent-jenkins
+      IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-ci-agent-jenkins
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-ci-agent-jenkins:latest
-      FROM_IMAGE_NAME: tssc-base-java-8
+      IMAGE_NAME: ploigos-ci-agent-jenkins
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest
+      FROM_IMAGE_NAME: ploigos-base-java-8
 
     services:
       registry:
@@ -399,21 +399,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ####################
-  # tssc-tool-argocd #
-  ####################
-  tssc-tool-argocd:
+  #######################
+  # ploigos-tool-argocd #
+  #######################
+  ploigos-tool-argocd:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-argocd
+      IMAGE_CONTEXT: ./ploigos-tool-argocd
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-argocd
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-argocd:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-tool-argocd
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-argocd:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -524,21 +524,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  #########################
-  # tssc-tool-config-lint #
-  #########################
-  tssc-tool-config-lint:
+  ############################
+  # ploigos-tool-config-lint #
+  ############################
+  ploigos-tool-config-lint:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-config-lint
+      IMAGE_CONTEXT: ./ploigos-tool-config-lint
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-config-lint
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-config-lint:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-tool-config-lint
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-config-lint:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -649,21 +649,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ##################
-  # tssc-tool-helm #
-  ##################
-  tssc-tool-helm:
+  #####################
+  # ploigos-tool-helm #
+  #####################
+  ploigos-tool-helm:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-helm
+      IMAGE_CONTEXT: ./ploigos-tool-helm
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-helm
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-helm:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-tool-helm
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-helm:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -789,21 +789,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ###################
-  # tssc-tool-maven #
-  ###################
-  tssc-tool-maven:
+  ######################
+  # ploigos-tool-maven #
+  ######################
+  ploigos-tool-maven:
     needs:
-    - tssc-base-java-8
+    - ploigos-base-java-8
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-maven
+      IMAGE_CONTEXT: ./ploigos-tool-maven
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-maven
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-maven:latest
-      FROM_IMAGE_NAME: tssc-base-java-8
+      IMAGE_NAME: ploigos-tool-maven
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest
+      FROM_IMAGE_NAME: ploigos-base-java-8
 
     services:
       registry:
@@ -918,21 +918,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ####################
-  # tssc-tool-skopeo #
-  ####################
-  tssc-tool-skopeo:
+  #######################
+  # ploigos-tool-skopeo #
+  #######################
+  ploigos-tool-skopeo:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-skopeo
+      IMAGE_CONTEXT: ./ploigos-tool-skopeo
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-skopeo
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-skopeo:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-tool-skopeo
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-skopeo:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -1043,21 +1043,21 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ###################
-  # tssc-tool-sonar #
-  ###################
-  tssc-tool-sonar:
+  ######################
+  # ploigos-tool-sonar #
+  ######################
+  ploigos-tool-sonar:
     needs:
-    - tssc-base
+    - ploigos-base
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./tssc-tool-sonar
+      IMAGE_CONTEXT: ./ploigos-tool-sonar
       IMAGE_FILE: Dockerfile
-      IMAGE_NAME: tssc-tool-sonar
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/tssc-tool-sonar:latest
-      FROM_IMAGE_NAME: tssc-base
+      IMAGE_NAME: ploigos-tool-sonar
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest
+      FROM_IMAGE_NAME: ploigos-base
 
     services:
       registry:
