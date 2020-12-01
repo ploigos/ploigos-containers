@@ -30,7 +30,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-base
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-base
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest
 
@@ -160,7 +160,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-base-java-8
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-base-java-8
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base-java-8:latest
       FROM_IMAGE_NAME: ploigos-base
@@ -285,7 +285,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-ci-agent-jenkins
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest
       FROM_IMAGE_NAME: ploigos-base-java-8
@@ -410,7 +410,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-argocd
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-argocd
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-argocd:latest
       FROM_IMAGE_NAME: ploigos-base
@@ -535,7 +535,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-config-lint
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-config-lint
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-config-lint:latest
       FROM_IMAGE_NAME: ploigos-base
@@ -660,7 +660,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-helm
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-helm
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-helm:latest
       FROM_IMAGE_NAME: ploigos-base
@@ -800,7 +800,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-maven
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-maven
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest
       FROM_IMAGE_NAME: ploigos-base-java-8
@@ -929,7 +929,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-skopeo
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-skopeo
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-skopeo:latest
       FROM_IMAGE_NAME: ploigos-base
@@ -1054,7 +1054,7 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-sonar
-      IMAGE_FILE: Dockerfile
+      IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-sonar
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest
       FROM_IMAGE_NAME: ploigos-base
