@@ -1,32 +1,32 @@
-# tssc-containers
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/tssc-containers/publish/main?label=publish%3A%20edge&logo=github-actions)](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish+branch%3Amain)
+# ploigos-containers
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/ploigos-containers/publish/main?label=publish%3A%20edge&logo=github-actions)](https://github.com/rhtconsulting/ploigos-containers/actions?query=workflow%3Apublish+branch%3Amain)
 <br />
-[![license](https://img.shields.io/github/license/rhtconsulting/tssc-containers)](LICENSE)
+[![license](https://img.shields.io/github/license/rhtconsulting/ploigos-containers)](LICENSE)
 
-Container image definitions for the TSSC project
+Container image definitions for the Ploigos project
 
-## tssc-base
-[![tssc-base](https://img.shields.io/badge/quay.io-tssc--base-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-base)
+## ploigos-base
+[![ploigos-base](https://img.shields.io/badge/quay.io-ploigos--base-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-base)
 
-Defines the base TSSC container image, from which all other TSSC images derive.
+Defines the base Ploigos container image, from which all other Ploigos images derive.
 
-## tssc-base-java-8
-[![tssc-base-java-8](https://img.shields.io/badge/quay.io-tssc--base--java--8-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-base)
+## ploigos-base-java-8
+[![ploigos-base-java-8](https://img.shields.io/badge/quay.io-ploigos--base--java--8-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-base)
 
-Defines a Java 8 base container image, built on top of `tssc-base`, from which many TSSC tool images derive.
+Defines a Java 8 base container image, built on top of `ploigos-base`, from which many Ploigos tool images derive.
 
-## tssc-ci-agent-jenkins
-[![tssc-ci-agent-jenkins](https://img.shields.io/badge/quay.io-tssc--ci--agent--jenkins-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-ci-agent-jenkins)
+## ploigos-ci-agent-jenkins
+[![ploigos-ci-agent-jenkins](https://img.shields.io/badge/quay.io-ploigos--ci--agent--jenkins-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-ci-agent-jenkins)
 
-Defines a jenkins agent as a sidecar for the `tssc-tool-*` containers. Built from `tssc-base-java-8`.
+Defines a jenkins agent as a sidecar for the `ploigos-tool-*` containers. Built from `ploigos-base-java-8`.
 
-## tssc-tool-argocd
-[![tssc-tool-argocd](https://img.shields.io/badge/quay.io-tssc--tool--argocd-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-argocd)
+## ploigos-tool-argocd
+[![ploigos-tool-argocd](https://img.shields.io/badge/quay.io-ploigos--tool--argocd-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-argocd)
 
-Defines an ArgoCD container image. Built from `tssc-base`.
+Defines an ArgoCD container image. Built from `ploigos-base`.
 
-## tssc-tool-containers
-[![tssc-tool-containers](https://img.shields.io/badge/quay.io-tssc--tool--containers-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-containers)
+## ploigos-tool-containers
+[![ploigos-tool-containers](https://img.shields.io/badge/quay.io-ploigos--tool--containers-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-containers)
 
 > **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
 
@@ -35,38 +35,38 @@ Defines a ci tools container that has tools for working with containers.
 * podman
 * skopeo
 
-## tssc-tool-config-lint
-[![tssc-tool-config-lint](https://img.shields.io/badge/quay.io-tssc--tool--config--lint-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-config-lint)
+## ploigos-tool-config-lint
+[![ploigos-tool-config-lint](https://img.shields.io/badge/quay.io-ploigos--tool--config--lint-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-config-lint)
 
-Defines a [config-lint](https://github.com/stelligent/config-lint) container image. Built from `tssc-base`.
+Defines a [config-lint](https://github.com/stelligent/config-lint) container image. Built from `ploigos-base`.
 
-## tssc-tool-maven
-[![tssc-tool-maven](https://img.shields.io/badge/quay.io-tssc--tool--maven-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-maven)
+## ploigos-tool-maven
+[![ploigos-tool-maven](https://img.shields.io/badge/quay.io-ploigos--tool--maven-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-maven)
 
-Defines a maven container image. Built from `tssc-base-java-8`.
+Defines a maven container image. Built from `ploigos-base-java-8`.
 
-## tssc-tool-openscap
-[![tssc-tool-openscap](https://img.shields.io/badge/quay.io-tssc--tool--openscap-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-openscap)
+## ploigos-tool-openscap
+[![ploigos-tool-openscap](https://img.shields.io/badge/quay.io-ploigos--tool--openscap-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-openscap)
 
 > **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
 
-Defines an OpenSCAP based image scanning container image. Built from tssc-base.
+Defines an OpenSCAP based image scanning container image. Built from ploigos-base.
 
-## tssc-tool-skopeo
-[![tssc-tool-skopeo](https://img.shields.io/badge/quay.io-tssc--tool--skopeo-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-skopeo)
+## ploigos-tool-skopeo
+[![ploigos-tool-skopeo](https://img.shields.io/badge/quay.io-ploigos--tool--skopeo-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-skopeo)
 
-Defines a skopeo container image. Built from `tssc-base`.
+Defines a skopeo container image. Built from `ploigos-base`.
 
-## tssc-tool-sonar
-[![tssc-tool-sonar](https://img.shields.io/badge/quay.io-tssc--tool--sonar-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/tssc/tssc-tool-sonar)
+## ploigos-tool-sonar
+[![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--sonar-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-sonar)
 
-Defines a sonar-scanner container image. Built from `tssc-base`.
+Defines a sonar-scanner container image. Built from `ploigos-base`.
 
 # Automatic Build, Test, and Publish
 
 The following github events to this repository will cause the
-[publish GitHub workflow](https://github.com/rhtconsulting/tssc-containers/actions?query=workflow%3Apublish)
-to kick off which will build, test, publish the images (that can) to [quay.io/tssc](https://quay.io/organization/tssc).
+[publish GitHub workflow](https://github.com/rhtconsulting/ploigos-containers/actions?query=workflow%3Apublish)
+to kick off which will build, test, publish the images (that can) to [quay.io/ploigos](https://quay.io/organization/ploigos).
 
 ## Events
 * schedule
@@ -80,14 +80,14 @@ to kick off which will build, test, publish the images (that can) to [quay.io/ts
 
 ## Images
 
-* tssc-base
-* tssc-ci-agent-jenkins
-* tssc-tool-argocd
-* tssc-tool-config-lint
-* tssc-tool-maven
-* tssc-tool-openscap
-* tssc-tool-skopeo
-* tssc-tool-sonar
+* ploigos-base
+* ploigos-ci-agent-jenkins
+* ploigos-tool-argocd
+* ploigos-tool-config-lint
+* ploigos-tool-maven
+* ploigos-tool-openscap
+* ploigos-tool-skopeo
+* ploigos-tool-sonar
 
 # Local Build, Test, and Publish
 
@@ -98,17 +98,17 @@ The following commands can be used for building these images locally
 ```
 # Run these commands from the directory where this repository was cloned
 
-podman build --tag tssc-base tssc-base
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-helm tssc-tool-helm
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-base-java-8 tssc-base-java-8
-podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-ci-agent-jenkins tssc-ci-agent-jenkins
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-argocd tssc-tool-argocd
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-containers tssc-tool-containers
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-config-lint tssc-tool-config-lint
-podman build --build-arg FROM_IMAGE=tssc-base-java-8 --tag tssc-tool-maven tssc-tool-maven
-podman build --build-arg FROM_IMAGE=tssc-tool-containers --tag tssc-tool-openscap tssc-tool-openscap
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-skopeo tssc-tool-skopeo
-podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-sonar
+podman build --tag ploigos-base ploigos-base
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-helm ploigos-tool-helm
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-base-java-8 ploigos-base-java-8
+podman build --build-arg FROM_IMAGE=ploigos-base-java-8 --tag ploigos-ci-agent-jenkins ploigos-ci-agent-jenkins
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-argocd ploigos-tool-argocd
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-containers ploigos-tool-containers
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-config-lint ploigos-tool-config-lint
+podman build --build-arg FROM_IMAGE=ploigos-base-java-8 --tag ploigos-tool-maven ploigos-tool-maven
+podman build --build-arg FROM_IMAGE=ploigos-tool-containers --tag ploigos-tool-openscap ploigos-tool-openscap
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-skopeo ploigos-tool-skopeo
+podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-sonar ploigos-tool-sonar
 ```
 ## Test
 
@@ -117,8 +117,8 @@ podman build --build-arg FROM_IMAGE=tssc-base --tag tssc-tool-sonar tssc-tool-so
 ## Publish
 Steps for manually publishing the images that need to be manually published.
 
-* tssc-tool-containers
-* tssc-tool-openscap
+* ploigos-tool-containers
+* ploigos-tool-openscap
 
 ### Setup
 Setup steps.
@@ -128,17 +128,17 @@ yum -y install podman, buildah
 
 ### Publish edge
 
-#### Publish to quay.io/tssc
+#### Publish to quay.io/ploigos
 ```
 ./manual-publish.sh
 ```
 or
 ```
-./manual-publish.sh edge tssc
+./manual-publish.sh edge ploigos
 ```
 or
 ```
-./manual-publish.sh edge tssc quay.io
+./manual-publish.sh edge ploigos quay.io
 ```
 
 #### Publish to personal quay.io repo
@@ -152,7 +152,7 @@ or
 
 ### Pubish release verson
 
-#### Publish the v1.0.0 release version to quay.io/tssc
+#### Publish the v1.0.0 release version to quay.io/ploigos
 ```
 ./manual-publish.sh v1.0.0
 ```
@@ -163,5 +163,4 @@ or
    * ex: `v1.42.0`
    * __NOTE__: must start with `v`
 2. manually publish the images that can't be automatically published
-   * ex: `./manual-publish.sh v1.42.0 tssc quay.io`
-
+   * ex: `./manual-publish.sh v1.42.0 ploigos quay.io`

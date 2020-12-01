@@ -1,0 +1,43 @@
+ARG FROM_IMAGE=quay.io/ploigos/ploigos-base:latest
+
+ARG HELM_PLUGINS_DIR=/helm/plugins
+ARG HELM_VERSION=v3.3.4
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION=v2.0.2
+
+FROM ${FROM_IMAGE}
+ARG PLOIGOS_USER_UID
+ARG HELM_VERSION
+ARG HELM_PLUGINS_DIR
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION
+
+LABEL com.redhat.component="ploigos-tool-helm" \
+      name="ploigos/ploigos-tool-helm" \
+      architecture="x86_64" \
+      io.k8s.display-name="Ploigos helm" \
+      io.k8s.description="Provides the helm executable" \
+      io.openshift.tags="ploigos,openshift,helm,python,python3,python36" \
+      maintainer="napsspo+ploigos@redhat.com"
+
+USER 0
+
+# download HELM and install in /usr/local/bin
+RUN curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o helm-${HELM_VERSION}-linux-amd64.tar.gz \
+    && tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz \
+    && mv linux-amd64/helm /usr/local/bin/helm
+
+# install the sops plugin for helm
+# NOTE: the trick of setting and unsetting XDG_DATA_HOME seems to be documented no where but
+#	also seems to be the only way to get the plugins to actually install in the right playce
+#	Found trick here: https://jenkins-x.io/community/labs/enhancements/proposals/4/readme/#231-quick-and-dirty-implementation
+RUN mkdir -p ${HELM_PLUGINS_DIR} && \
+    chmod g+rwx ${HELM_PLUGINS_DIR}
+ENV HELM_PLUGINS=${HELM_PLUGINS_DIR}
+RUN export XDG_DATA_HOME="/" \
+    && helm plugin install https://github.com/zendesk/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
+    && unset XDG_DATA_HOME
+RUN chmod -R g+w ${HELM_PLUGINS_DIR}
+
+
+USER ${PLOIGOS_USER_UID}
+
+ENTRYPOINT [ "/usr/local/bin/helm" ]

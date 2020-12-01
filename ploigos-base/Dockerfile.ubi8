@@ -1,0 +1,70 @@
+ARG BASE_IMAGE=registry.access.redhat.com/ubi8:latest
+ARG PLOIGOS_USER_NAME=ploigos
+ARG PLOIGOS_USER_UID=1001
+ARG PLOIGOS_USER_GID=0
+ARG PLOIGOS_HOME_DIR=/home/ploigos
+ARG PLOIGOS_SOURCE=git+https://github.com/rhtconsulting/tssc-python-package.git@main
+
+##############################################
+# Stage 1 : Retrieive oc cli
+##############################################
+FROM quay.io/openshift/origin-cli as origin-cli
+
+##############################################
+# Stage 2 : Build ploigos-base
+##############################################
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_NAME
+ARG PLOIGOS_USER_UID
+ARG PLOIGOS_USER_GID
+ARG PLOIGOS_HOME_DIR
+ARG PLOIGOS_SOURCE
+COPY --from=origin-cli /usr/bin/oc /usr/bin/oc
+COPY --from=origin-cli /usr/bin/kubectl /usr/bin/kubectl
+
+# arguments
+# NOTE: arguments used in sub stage have to be in that stage (at least when building with docker, buildah doesn't seem to have a problem either way)
+ARG SOPS_RPM="https://github.com/mozilla/sops/releases/download/v3.6.1/sops-3.6.1-1.x86_64.rpm"
+
+# Labels consumed by Red Hat build service
+LABEL com.redhat.component="ploigos-base" \
+      name="ploigos/ploigos-base" \
+      architecture="x86_64" \
+      io.k8s.display-name="Ploigos Base Image" \
+      io.k8s.description="Ploigos Base image, including python 3.6, and miscellaneous utilities" \
+      io.openshift.tags="ploigos,openshift,python3,python36" \
+      maintainer="napsspo+ploigos@redhat.com"
+
+ENV HOME=/home/ploigos \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+USER root
+
+# Install JQ
+RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/bin/jq && \
+    chmod +x /usr/bin/jq
+
+# Install packages
+RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-pip python3-pip-wheel python3-setuptools python36-devel ${SOPS_RPM} gnupg2" && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf update -y && \
+    rpm -V $INSTALL_PKGS && \
+    dnf clean all
+
+# Configure Python
+RUN alternatives --set python /usr/bin/python3 && \
+    python -m pip install --no-cache-dir --upgrade pip
+
+# Install PLOIGOS python library
+RUN python -m pip install --no-cache-dir --upgrade ${PLOIGOS_SOURCE}
+
+# Configure ploigos user
+RUN useradd ploigos --uid $PLOIGOS_USER_UID --gid $PLOIGOS_USER_GID --home-dir ${PLOIGOS_HOME_DIR} --create-home --shell /sbin/nologin && \
+    chown -R $PLOIGOS_USER_UID:${PLOIGOS_USER_GID} ${PLOIGOS_HOME_DIR} && \
+    chmod -R g+w ${PLOIGOS_HOME_DIR}
+
+USER $PLOIGOS_USER_UID
+##############################################
+# End
+##############################################

@@ -1,0 +1,16 @@
+ARG FROM_IMAGE=quay.io/ploigos/ploigos-tool-buildah:latest
+
+FROM $FROM_IMAGE
+ARG PLOIGOS_USER_UID
+
+LABEL com.redhat.component="ploigos-tool-image-scanner" \
+      name="ploigos/ploigos-tool-image-scanner" \
+      architecture="x86_64" \
+      io.k8s.display-name="Ploigos image-scanner" \
+      io.k8s.description="The Ploigos image-scanner image provides the image-scanner executable" \
+      io.openshift.tags="ploigos,openshift,image-scanner,python,python3,python36" \
+      maintainer="napsspo+ploigos@redhat.com"
+
+ENV INSTALL_PKGS="openscap-scanner"
+RUN dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
+    && dnf clean all --enablerepo=\*
