@@ -52,11 +52,6 @@ Defines a maven container image. Built from `ploigos-base-java-8`.
 
 Defines an OpenSCAP based image scanning container image. Built from ploigos-base.
 
-## ploigos-tool-skopeo
-[![ploigos-tool-skopeo](https://img.shields.io/badge/quay.io-ploigos--tool--skopeo-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-skopeo)
-
-Defines a skopeo container image. Built from `ploigos-base`.
-
 ## ploigos-tool-sonar
 [![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--sonar-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-sonar)
 
@@ -86,7 +81,6 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 * ploigos-tool-config-lint
 * ploigos-tool-maven
 * ploigos-tool-openscap
-* ploigos-tool-skopeo
 * ploigos-tool-sonar
 
 # Local Build, Test, and Publish
@@ -107,7 +101,6 @@ podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-containers p
 podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-config-lint ploigos-tool-config-lint
 podman build --build-arg FROM_IMAGE=ploigos-base-java-8 --tag ploigos-tool-maven ploigos-tool-maven
 podman build --build-arg FROM_IMAGE=ploigos-tool-containers --tag ploigos-tool-openscap ploigos-tool-openscap
-podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-skopeo ploigos-tool-skopeo
 podman build --build-arg FROM_IMAGE=ploigos-base --tag ploigos-tool-sonar ploigos-tool-sonar
 ```
 ## Test
