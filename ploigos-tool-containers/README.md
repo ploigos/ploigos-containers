@@ -6,7 +6,7 @@ container CLI tools container image.
 This container image is intended to be used as the container image to run Ploigos workflow steps
 in that require access to CLI tools related to container image operations.
 
-Includedm CLI tools:
+Included CLI tools:
 * `buildah`
 * `podman`
 * `skopeo`
