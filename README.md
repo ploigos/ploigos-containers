@@ -1,7 +1,7 @@
 # ploigos-containers
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/rhtconsulting/ploigos-containers/publish/main?label=publish%3A%20edge&logo=github-actions)](https://github.com/rhtconsulting/ploigos-containers/actions?query=workflow%3Apublish+branch%3Amain)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/ploigos/ploigos-containers/publish/main?label=publish%3A%20edge&logo=github-actions)](https://github.com/ploigos/ploigos-containers/actions?query=workflow%3Apublish+branch%3Amain)
 <br />
-[![license](https://img.shields.io/github/license/rhtconsulting/ploigos-containers)](LICENSE)
+[![license](https://img.shields.io/github/license/ploigos/ploigos-containers)](LICENSE)
 
 Container image definitions for the Ploigos project
 
