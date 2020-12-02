@@ -3,7 +3,7 @@ ARG PLOIGOS_USER_NAME=ploigos
 ARG PLOIGOS_USER_UID=1001
 ARG PLOIGOS_USER_GID=0
 ARG PLOIGOS_HOME_DIR=/home/ploigos
-ARG PLOIGOS_SOURCE=git+https://github.com/rhtconsulting/tssc-python-package.git@main
+ARG PLOIGOS_SOURCE=tssc==0.14.0
 
 ##############################################
 # Stage 1 : Retrieive oc cli
@@ -56,7 +56,7 @@ RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-p
 RUN alternatives --set python /usr/bin/python3 && \
     python -m pip install --no-cache-dir --upgrade pip
 
-# Install PLOIGOS python library
+# Install Ploigos step runner python library
 RUN python -m pip install --no-cache-dir --upgrade ${PLOIGOS_SOURCE}
 
 # Configure ploigos user
