@@ -82,15 +82,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS:
         with:
@@ -114,6 +114,7 @@ jobs:
             org.opencontainers.image.version=${{ steps.prep.outputs.version }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          no-cache: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -213,15 +214,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -230,7 +231,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -338,15 +339,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -355,7 +356,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -463,15 +464,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -480,7 +481,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -588,15 +589,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -605,7 +606,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -713,15 +714,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -730,7 +731,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -853,15 +854,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -870,7 +871,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
@@ -982,15 +983,15 @@ jobs:
         run: echo ${{ steps.prep.outputs.tags }}
 
       - name: Set up QEMU 🧰
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.0.1
 
       - name: Set up Docker Buildx 🧰
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.0.4
         with:
           driver-opts: network=host
 
       - name: Cache Docker layers 🗃
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -999,7 +1000,7 @@ jobs:
 
       - name: Build Image 🛠
         id: image_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.2.1
         env:
           IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
