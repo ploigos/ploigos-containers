@@ -4,11 +4,12 @@ ARG PLOIGOS_USER_UID=1001
 ARG PLOIGOS_USER_GID=0
 ARG PLOIGOS_HOME_DIR=/home/ploigos
 ARG PLOIGOS_SOURCE=tssc==0.14.0
+ARG OPENSHIFT_CLI_VERSION=4.6
 
 ##############################################
 # Stage 1 : Retrieive oc cli
 ##############################################
-FROM quay.io/openshift/origin-cli as origin-cli
+FROM quay.io/openshift/origin-cli:$OPENSHIFT_CLI_VERSION as origin-cli
 
 ##############################################
 # Stage 2 : Build ploigos-base
