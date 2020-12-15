@@ -1,4 +1,5 @@
-ARG FROM_IMAGE=quay.io/ploigos/ploigos-base:latest
+# NOTE: from Java so can have access to keytool
+ARG FROM_IMAGE=quay.io/ploigos/ploigos-base-java-8:latest
 
 FROM $FROM_IMAGE
 ARG PLOIGOS_USER_UID

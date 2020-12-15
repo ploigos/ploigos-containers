@@ -923,7 +923,7 @@ jobs:
   ######################
   ploigos-tool-sonar:
     needs:
-    - ploigos-base
+    - ploigos-base-java-8
 
     runs-on: ubuntu-latest
 
@@ -932,7 +932,7 @@ jobs:
       IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-tool-sonar
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest
-      FROM_IMAGE_NAME: ploigos-base
+      FROM_IMAGE_NAME: ploigos-base-java-8
 
     services:
       registry:

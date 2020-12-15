@@ -65,6 +65,9 @@ RUN useradd ploigos --uid $PLOIGOS_USER_UID --gid $PLOIGOS_USER_GID --home-dir $
     chown -R $PLOIGOS_USER_UID:${PLOIGOS_USER_GID} ${PLOIGOS_HOME_DIR} && \
     chmod -R g+w ${PLOIGOS_HOME_DIR}
 
+# allow root(0) group to run update-ca-trust extract
+RUN chmod -R g+w /etc/pki/ca-trust/extracted
+
 USER $PLOIGOS_USER_UID
 ##############################################
 # End
