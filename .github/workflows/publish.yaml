@@ -123,9 +123,13 @@ jobs:
           docker run ${{ env.IMAGE_TAG_LOCAL }} python3 --version
           echo "Test pip3 installed"
           docker run ${{ env.IMAGE_TAG_LOCAL }} pip3 --version
-          echo "Test oc installed
+          echo "Test ploigos-step-runner is installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} pip show ploigos-step-runner
+          echo "Test psr CLI works"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} psr --help
+          echo "Test oc installed"
           docker run ${{ env.IMAGE_TAG_LOCAL }} oc version
-          echo "Test git installed
+          echo "Test git installed"
           docker run ${{ env.IMAGE_TAG_LOCAL }} git version
           echo "Test yq installed"
           docker run ${{ env.IMAGE_TAG_LOCAL }} yq --version
