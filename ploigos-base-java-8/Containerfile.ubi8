@@ -10,7 +10,7 @@ LABEL com.redhat.component="ploigos-base-java-8" \
       io.k8s.display-name="Ploigos  Base Java 8" \
       io.k8s.description="The Ploigos  Base Java 8 image builds on top of the Ploigos  base image to include the Java 8 JDK" \
       io.openshift.tags="ploigos,openshift,java,python,python3,python36" \
-      maintainer="napsspo+ploigos@redhat.com"
+      maintainer="ploigos@redhat.com"
 
 USER root
 # Install headless Java

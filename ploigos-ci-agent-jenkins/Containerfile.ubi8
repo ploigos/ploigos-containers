@@ -10,7 +10,7 @@ LABEL com.redhat.component="ploigos-ci-agent-jenkins" \
       io.k8s.display-name="Jenkins Agent" \
       io.k8s.description="The Ploigos jenkins agent" \
       io.openshift.tags="ploigos,openshift,java,jenkins,agent,python,python3,python36" \
-      maintainer="napsspo+ploigos@redhat.com"
+      maintainer="ploigos@redhat.com"
 
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8

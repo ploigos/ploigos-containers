@@ -6,7 +6,7 @@ ARG FROM_IMAGE=quay.io/ploigos/ploigos-base:latest
 FROM $FROM_IMAGE
 ARG PLOIGOS_USER_UID
 
-LABEL maintainer="napsspo+ploigos@redhat.com" \
+LABEL maintainer="ploigos@redhat.com" \
       name="ploigos/ploigos-tool-containers" \
       architecture="x86_64" \
       io.k8s.display-name="ploigos-tool-containers" \
