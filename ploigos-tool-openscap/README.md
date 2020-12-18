@@ -20,12 +20,11 @@ podman push quay.io/ploigos/ploigos-tool-openscap:latest
 ## Local Test
 
 ```
-export container_image_url=quay.io/tssc/tssc-reference-app-quarkus-tssc
-export container_image_tag=1.0.2-feature_napsspo-535
+export container_image_tag=IMAGE_TAG_TO_SCAN
 
 podman run --rm quay.io/ploigos/ploigos-tool-openscap:latest /bin/bash -c "
-    echo -en \"Pulling image $container_image_url:$container_image_tag\n\n\";
-    buildah from --storage-driver vfs --log-level debug docker://$container_image_url:$container_image_tag;
+    echo -en \"Pulling image $container_image_tag\n\n\";
+    buildah from --storage-driver vfs --log-level debug docker://$container_image_tag;
     container_id=$(buildah --storage-driver vfs containers -q);
     buildah mount --storage-driver vfs $container_id;
     echo -en \"\nRunning oscap-chroot scan\n\";
