@@ -1,0 +1,2 @@
+gitea:1.2.1
+ansicolor:0.7.3
