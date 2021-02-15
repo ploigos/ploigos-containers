@@ -1,7 +1,7 @@
 # use the existing Jenkins image so we have access to the install-plugins
 # script. It also lets us avoid pulling down dependencies that are already in
 # the base image
-FROM registry.redhat.io/openshift4/ose-jenkins:latest AS jenkins
+FROM registry.access.redhat.com/openshift4/ose-jenkins:latest AS jenkins
 
 USER root
 
@@ -18,7 +18,7 @@ RUN find /opt/openshift/plugins -type l -delete && \
 
 # shift to a ubi-minimal image, copy in the plugins that were installed above.
 # this leaves us with a minimal image with just the plugins.
-FROM registry.redhat.io/ubi8/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 USER 1001
 
