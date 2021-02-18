@@ -502,8 +502,8 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client"
-          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client
+          echo "Running: docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} ploigos-jenkins-plugins/ansicolor.jpi ploigos-jenkins-plugins/openshift-client.jpi"
+          docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} ploigos-jenkins-plugins/ansicolor.jpi ploigos-jenkins-plugins/openshift-client.jpi
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
@@ -1270,7 +1270,8 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "TODO"
+          echo "Running: docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} /usr/lib/jenkins/jenkins.war"
+          docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} /usr/lib/jenkins/jenkins.war
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
