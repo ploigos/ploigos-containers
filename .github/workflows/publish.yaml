@@ -406,19 +406,19 @@ jobs:
         run: echo ${{ steps.image_build.outputs.digest }}
 
   ############################
-  # ploigos-jenkins-plugins #
+  # ploigos-jenkins-init #
   ############################
-  ploigos-jenkins-plugins:
+  ploigos-jenkins-init:
     needs:
     - cancel-previous
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./ploigos-jenkins-plugins
+      IMAGE_CONTEXT: ./ploigos-jenkins-init
       IMAGE_FILE: Containerfile
-      IMAGE_NAME: ploigos-jenkins-plugins
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-jenkins-plugins:latest
+      IMAGE_NAME: ploigos-jenkins-init
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-jenkins-init:latest
 
     services:
       registry:
