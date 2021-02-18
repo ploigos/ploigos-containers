@@ -1,4 +1,4 @@
-# ploigos-jenkins-plugins
+# ploigos-jenkins-init
 
 This container image contains the set of Jenkins plugins and dependencies that Ploigos workflows require.
 
