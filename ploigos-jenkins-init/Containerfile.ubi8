@@ -1,7 +1,7 @@
 # use the existing Jenkins image so we have access to the install-plugins
 # script. It also lets us avoid pulling down dependencies that are already in
 # the base image
-FROM registry.access.redhat.com/openshift4/ose-jenkins:latest AS jenkins
+FROM quay.io/openshift/origin-jenkins:latest AS jenkins
 
 USER root
 
@@ -10,10 +10,8 @@ COPY ./ploigos-plugins.txt /tmp/ploigos-plugins.txt
 RUN /usr/local/bin/install-plugins.sh /tmp/ploigos-plugins.txt
 
 # delete the symlinks
-# rename *.hpi to *.jpi, since Jenkins expects this
 # copy everything into /usr/lib/jenkins so we can grab it for the final image.
 RUN find /opt/openshift/plugins -type l -delete && \
-    for f in /usr/lib/jenkins/*.hpi ; do mv -v $f /usr/lib/jenkins/$(basename $f ".hpi").jpi ; done && \
     cp -v /opt/openshift/plugins/* /usr/lib/jenkins/
 
 # shift to a ubi-minimal image, copy in the plugins that were installed above.
