@@ -21,11 +21,28 @@ USER 0
 # Don't include container-selinux and remove
 # directories used by yum that are just taking
 # up space.
-RUN dnf -y module enable container-tools:rhel8; \
-    dnf -y update; \
-    dnf -y reinstall shadow-utils; \
-    dnf -y install buildah podman skopeo fuse-overlayfs /etc/containers/storage.conf; \
-    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+#RUN dnf -y module enable container-tools:rhel8; \
+#    dnf -y update; \
+#    dnf -y reinstall shadow-utils; \
+#    dnf -y install buildah podman skopeo fuse-overlayfs /etc/containers/storage.conf; \
+#    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# update all the things
+RUN dnf -y update;
+
+# setup Kubic (https://podman.io/getting-started/installation#linux-distributions)
+# since podman and buildah not available in ubi repositories
+RUN dnf -y module disable container-tools; \
+    dnf -y install 'dnf-command(copr)'; \
+    dnf -y copr enable rhcontainerbot/container-selinux; \
+    curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo;
+
+# install container tools packages
+RUN dnf -y reinstall shadow-utils; \
+    dnf -y --refresh install runc podman buildah skopeo;
+
+# clean up dnf cache
+RUN rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
 # Adjust storage.conf to enable Fuse storage.
 RUN sed -i -e 's|^#mount_program|mount_program|g' -e '/additionalimage.*/a "/var/lib/shared",' /etc/containers/storage.conf
