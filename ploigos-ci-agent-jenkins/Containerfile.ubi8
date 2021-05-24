@@ -1,16 +1,22 @@
-ARG FROM_IMAGE=quay.io/ploigos/ploigos-base-java-8:latest
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base-java-8:latest.ubi8
 
-FROM $FROM_IMAGE
+FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 
-# Labels consumed by Red Hat build service
-LABEL com.redhat.component="ploigos-ci-agent-jenkins" \
-      name="ploigos/ploigos-ci-agent-jenkins" \
-      architecture="x86_64" \
-      io.k8s.display-name="Jenkins Agent" \
-      io.k8s.description="The Ploigos jenkins agent" \
-      io.openshift.tags="ploigos,openshift,java,jenkins,agent,python,python3,python36" \
-      maintainer="ploigos@redhat.com"
+# labels
+ENV DESCRIPTION="Ploigos CI agent for Jenkins"
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-ci-agent-jenkins" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - CI Agent - Jenkins" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,jenkins,jnlp" \
+    com.redhat.component="ploigos-ci-agent-jenkins-container"
 
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
@@ -35,7 +41,3 @@ USER $PLOIGOS_USER_UID
 
 # Run the Jenkins JNLP client
 ENTRYPOINT ["/usr/local/bin/run-jnlp-client"]
-
-##############################################
-# End
-##############################################

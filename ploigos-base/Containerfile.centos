@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=registry.access.redhat.com/ubi8:latest
+ARG BASE_IMAGE=quay.io/centos/centos:8
 ARG PLOIGOS_USER_NAME=ploigos
 ARG PLOIGOS_USER_UID=1001
 ARG PLOIGOS_USER_GID=0

@@ -10,6 +10,12 @@ on:
     - 'v*.*.*'
   pull_request:
 
+env:
+  GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+  GITHUB_EVENT_NUMBER: ${{ github.event.number }}
+  REGISTRY_URI: ${{ secrets.REGISTRY_URI }}
+  REGISTRY_REPOSITORY: ${{ secrets.REGISTRY_REPOSITORY }}
+
 jobs:
   cancel-previous:
     runs-on: ubuntu-latest
@@ -19,10 +25,12 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  ################
-  # ploigos-base #
-  ################
-  ploigos-base:
+## UBI8 ##
+
+  #####################
+  # ploigos-base_ubi8 #
+  #####################
+  ploigos-base_ubi8:
     needs:
     - cancel-previous
 
@@ -30,9 +38,11 @@ jobs:
 
     env:
       IMAGE_CONTEXT: ./ploigos-base
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-base
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
 
     services:
       registry:
@@ -46,34 +56,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -155,21 +138,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  #######################
-  # ploigos-base-java-8 #
-  #######################
-  ploigos-base-java-8:
+  #############################
+  # ploigos-base-java-8_ubi8  #
+  #############################
+  ploigos-base-java-8_ubi8 :
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-base-java-8
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-base-java-8
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base-java-8:latest
-      FROM_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base-java-8:latest.ubi8
+      BASE_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
 
     services:
       registry:
@@ -183,34 +168,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -238,7 +196,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -280,21 +238,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ############################
-  # ploigos-ci-agent-jenkins #
-  ############################
-  ploigos-ci-agent-jenkins:
+  ##################################
+  # ploigos-ci-agent-jenkins_ubi8  #
+  ##################################
+  ploigos-ci-agent-jenkins_ubi8:
     needs:
-    - ploigos-base-java-8
+    - ploigos-base-java-8_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-ci-agent-jenkins
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest
-      FROM_IMAGE_NAME: ploigos-base-java-8
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest.ubi8
+      BASE_IMAGE_NAME: ploigos-base-java-8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
 
     services:
       registry:
@@ -308,34 +268,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -363,7 +296,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -405,9 +338,9 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ############################
-  # ploigos-jenkins-init #
-  ############################
+  #########################
+  # ploigos-jenkins-init  #
+  #########################
   ploigos-jenkins-init:
     needs:
     - cancel-previous
@@ -419,6 +352,7 @@ jobs:
       IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-jenkins-init
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-jenkins-init:latest
+      IMAGE_IS_DEFAULT_FLAVOR: true
 
     services:
       registry:
@@ -432,34 +366,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -526,21 +433,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  #######################
-  # ploigos-tool-argocd #
-  #######################
-  ploigos-tool-argocd:
+  ############################
+  # ploigos-tool-argocd_ubi8 #
+  ############################
+  ploigos-tool-argocd_ubi8:
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-argocd
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-argocd
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-argocd:latest
-      FROM_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-argocd:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -554,34 +463,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -609,7 +491,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -651,21 +533,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ############################
-  # ploigos-tool-config-lint #
-  ############################
-  ploigos-tool-config-lint:
+  #################################
+  # ploigos-tool-config-lint_ubi8 #
+  #################################
+  ploigos-tool-config-lint_ubi8:
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-config-lint
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-config-lint
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-config-lint:latest
-      FROM_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-config-lint:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -679,34 +563,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -734,7 +591,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -776,21 +633,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  #####################
-  # ploigos-tool-helm #
-  #####################
-  ploigos-tool-helm:
+  ##########################
+  # ploigos-tool-helm_ubi8 #
+  ##########################
+  ploigos-tool-helm_ubi8:
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-helm
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-helm
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-helm:latest
-      FROM_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-helm:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -804,34 +663,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -859,7 +691,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -916,21 +748,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ######################
-  # ploigos-tool-maven #
-  ######################
-  ploigos-tool-maven:
+  ###########################
+  # ploigos-tool-maven_ubi8 #
+  ###########################
+  ploigos-tool-maven_ubi8:
     needs:
-    - ploigos-base-java-8
+    - ploigos-base-java-8_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-maven
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-maven
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest
-      FROM_IMAGE_NAME: ploigos-base-java-8
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base-java-8
 
     services:
       registry:
@@ -944,34 +778,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -999,7 +806,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -1045,21 +852,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ######################
-  # ploigos-tool-sonar #
-  ######################
-  ploigos-tool-sonar:
+  ###########################
+  # ploigos-tool-sonar_ubi8 #
+  ###########################
+  ploigos-tool-sonar_ubi8:
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-sonar
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-sonar
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest
-      FROM_IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -1073,34 +882,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -1128,7 +910,7 @@ jobs:
         id: image_build
         uses: docker/build-push-action@v2.2.1
         env:
-          IMAGE_BUILD_ARGS: FROM_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.FROM_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
         with:
           context: ${{ env.IMAGE_CONTEXT }}
           file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
@@ -1184,6 +966,7 @@ jobs:
       IMAGE_FILE: Containerfile
       IMAGE_NAME: ploigos-jenkins
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-jenkins:latest
+      IMAGE_IS_DEFAULT_FLAVOR: true
 
     services:
       registry:
@@ -1197,34 +980,7 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
-        run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
-
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
-
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -1294,20 +1050,23 @@ jobs:
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
 
-  ######################
-  # ploigos-tool-rekor #
-  ######################
-  ploigos-tool-rekor:
+  ###########################
+  # ploigos-tool-rekor_ubi8 #
+  ###########################
+  ploigos-tool-rekor_ubi8:
     needs:
-    - ploigos-base
+    - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
       IMAGE_CONTEXT: ./ploigos-tool-rekor
-      IMAGE_FILE: Containerfile
+      IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-rekor
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-rekor:latest
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-rekor:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
 
     services:
       registry:
@@ -1321,34 +1080,214 @@ jobs:
 
       - name: Determine Image Version and Tags ⚙️
         id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v1.0.1
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v1.0.4
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v2.1.3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v2.2.1
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
         run: |
-          IMAGE_REPOSITORY=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.IMAGE_NAME }}
+          echo "Check rekor binary exists"
+          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "rekor --help"
 
-          VERSION=noop
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            VERSION=nightly
-          elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF == refs/heads/* ]]; then
-            VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
-            if [ "${{ github.event.repository.default_branch }}" = "$VERSION" ]; then
-              VERSION=edge
-            fi
-          elif [[ $GITHUB_REF == refs/pull/* ]]; then
-            VERSION=pr-${{ github.event.number }}
-          fi
-          TAGS="${IMAGE_REPOSITORY}:${VERSION}"
-          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            MINOR=${VERSION%.*}
-            MAJOR=${MINOR%.*}
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:${MINOR},${IMAGE_REPOSITORY}:${MAJOR},${IMAGE_REPOSITORY}:latest"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            TAGS="$TAGS,${IMAGE_REPOSITORY}:sha-${GITHUB_SHA::8}"
-          fi
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-          echo ::set-output name=version::${VERSION}
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ################################
+  # ploigos-tool-containers_ubi8 #
+  ################################
+  ploigos-tool-containers_ubi8:
+    needs:
+    - ploigos-base_ubi8
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-containers
+      IMAGE_FILE: Containerfile.ubi8
+      IMAGE_NAME: ploigos-tool-containers
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-containers:latest.ubi8
+      IMAGE_TAG_FLAVOR: .ubi8
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v1.0.1
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v1.0.4
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v2.1.3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v2.2.1
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+## CENTOS ##
+
+  #######################
+  # ploigos-base_centos #
+  #######################
+  ploigos-base_centos:
+    needs:
+    - cancel-previous
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-base
+      IMAGE_FILE: Containerfile.centos
+      IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest.centos
+      IMAGE_TAG_FLAVOR: .centos
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
 
       - name: Version 📌
         run: echo ${{ steps.prep.outputs.version }}
@@ -1394,8 +1333,226 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Check rekor binary exists"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "rekor --help"
+          echo "Test python3 installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} python3 --version
+          echo "Test pip3 installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} pip3 --version
+          echo "Test ploigos-step-runner is installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} pip show ploigos-step-runner
+          echo "Test psr CLI works"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} psr --help
+          echo "Test oc installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} oc version
+          echo "Test git installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} git version
+          echo "Test yq installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} yq --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##################################
+  # ploigos-tool-containers_centos #
+  ##################################
+  ploigos-tool-containers_centos:
+    needs:
+    - ploigos-base_centos
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-containers
+      IMAGE_FILE: Containerfile.centos
+      IMAGE_NAME: ploigos-tool-containers
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-containers:latest.centos
+      IMAGE_TAG_FLAVOR: .centos
+      IMAGE_IS_DEFAULT_FLAVOR: false
+      BASE_IMAGE_NAME: ploigos-base
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v1.0.1
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v1.0.4
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v2.1.3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v2.2.1
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ################################
+  # ploigos-tool-openscap_centos #
+  ################################
+  ploigos-tool-openscap_centos:
+    needs:
+    - ploigos-tool-containers_centos
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-openscap
+      IMAGE_FILE: Containerfile.ubi8
+      IMAGE_NAME: ploigos-tool-openscap
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-openscap:latest
+      IMAGE_TAG_FLAVOR: .centos
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-tool-containers
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v1.0.1
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v1.0.4
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v2.1.3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v2.2.1
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ steps.prep.outputs.version }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "test oscap"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} oscap --version
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1

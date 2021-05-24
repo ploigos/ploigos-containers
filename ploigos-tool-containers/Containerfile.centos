@@ -1,7 +1,7 @@
 # This image is based on the following Dockerfiles:
 # https://catalog.redhat.com/software/containers/rhel8/buildah/5dca3d76dd19c71643b226d5?container-tabs=dockerfile
 # https://github.com/containers/buildah/blob/master/contrib/buildahimage/stable/Dockerfile
-ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.centos
 ARG GO_VERSION=1.12.17
 
 FROM $BASE_IMAGE
@@ -23,7 +23,6 @@ LABEL \
     io.openshift.tags="ploigos,podman,skopeo,buildah" \
     com.redhat.component="ploigos-tool-containers-container"
 
-# NOTE This image must run priviliged
 USER root
 
 # update and install packages

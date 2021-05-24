@@ -1,1 +1,39 @@
-Containerfile.ubi8
+# use the existing Jenkins image so we have access to the install-plugins
+# script. It also lets us avoid pulling down dependencies that are already in
+# the base image
+FROM quay.io/openshift/origin-jenkins:latest AS jenkins
+
+# labels
+ENV DESCRIPTION="Ploigos Jenkins init container"
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-jenkins-init" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Jenkins init" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,jenkins,init" \
+    com.redhat.component="ploigos-jenkins-init-container"
+
+USER root
+
+# fetch the container images
+COPY ./ploigos-plugins.txt /tmp/ploigos-plugins.txt
+RUN /usr/local/bin/install-plugins.sh /tmp/ploigos-plugins.txt
+
+# delete the symlinks
+# copy everything into /usr/lib/jenkins so we can grab it for the final image.
+RUN find /opt/openshift/plugins -type l -delete && \
+    cp -v /opt/openshift/plugins/* /usr/lib/jenkins/
+
+# shift to a ubi-minimal image, copy in the plugins that were installed above.
+# this leaves us with a minimal image with just the plugins.
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+USER 1001
+
+# copy the artifacts from the previous image
+COPY --from=jenkins /usr/lib/jenkins /ploigos-jenkins-plugins
