@@ -1,6 +1,0 @@
-FROM quay.io/openshift/origin-jenkins:latest
-
-USER root
-
-# Allow root(0) group to run update-ca-trust extract
-RUN chmod -R g+w /etc/pki/ca-trust/extracted

@@ -1,26 +1,33 @@
-ARG FROM_IMAGE=quay.io/ploigos/ploigos-base-java-8:latest
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base-java-8:latest.ubi8
 
-FROM $FROM_IMAGE
+FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 
-# Labels consumed by Red Hat build service
-LABEL com.redhat.component="ploigos-ubi8-maven" \
-      name="ploigos/ploigos-ubi8-mavenpodm" \
-      architecture="x86_64" \
-      io.k8s.display-name="Ploigos Maven" \
-      io.k8s.description="The Ploigos Maven image builds on top of the Ploigos base Java 8 image to include maven" \
-      io.openshift.tags="ploigos,openshift,java,maven,python,python3,python36" \
-      maintainer="ploigos@redhat.com"
+# labels
+ENV DESCRIPTION="Ploigos tool container with maven."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-maven" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - maven" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,maven" \
+    com.redhat.component="ploigos-tool-maven-container"
 
 ENV MAVEN_OPTS="-Duser.home=$HOME"
 
 USER root
-# Install Maven
+
+# update and install packages
 RUN INSTALL_PKGS="maven" && \
+    dnf update -y --allowerasing --nobest && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
-    dnf update -y && \
-    dnf clean all
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
 # Copy scripts
 ADD contrib/bin/* /usr/local/bin/
@@ -29,7 +36,3 @@ USER $PLOIGOS_USER_UID
 
 # Configure maven settings
 ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
-
-##############################################
-# End
-##############################################

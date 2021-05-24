@@ -1,19 +1,26 @@
-ARG FROM_IMAGE=quay.io/ploigos/ploigos-base:latest
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
 
-FROM $FROM_IMAGE
+FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 ARG SONAR_CLI=sonar-scanner-cli-4.4.0.2170-linux
 ARG SONAR=sonar-scanner-4.4.0.2170-linux
 
-LABEL com.redhat.component="ploigos-tool-sonar" \
-      name="ploigos/ploigos-tool-sonar" \
-      architecture="x86_64" \
-      io.k8s.display-name="Ploigos sonar scanner" \
-      io.k8s.description="The Ploigos sonar image provides the sonar  scanner executable" \
-      io.openshift.tags="openshift,sonar,python,python3,python36" \
-      maintainer="ploigos@redhat.com"
+# labels
+ENV DESCRIPTION="Ploigos tool container with Sonar CLI."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-sonar" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - sonar" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,sonar" \
+    com.redhat.component="ploigos-tool-sonar-container"
 
-USER 0
+USER root
 
 # Goal:
 #    Install sonar-scanner for CLI.
@@ -25,15 +32,11 @@ USER 0
 #        https://amoffat.github.io/sh/sections/faq.html
 WORKDIR /usr/bin
 RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR_CLI}.zip -o sonar.zip && \
-unzip ./sonar.zip && \
-rm ./sonar.zip && \
-mv ./${SONAR} ./sonar && \
-chown -R 1001:0 /usr/bin/sonar
+    unzip ./sonar.zip && \
+    rm ./sonar.zip && \
+    mv ./${SONAR} ./sonar && \
+    chown -R 1001:0 /usr/bin/sonar
 
 ENV PATH /usr/bin/sonar/bin:$PATH
 
 USER $PLOIGOS_USER_UID
-
-##############################################
-# End
-##############################################

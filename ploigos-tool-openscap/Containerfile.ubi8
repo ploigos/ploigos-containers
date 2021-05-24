@@ -1,16 +1,25 @@
-ARG FROM_IMAGE=quay.io/ploigos/ploigos-tool-buildah:latest
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-containers:latest.ubi8
 
-FROM $FROM_IMAGE
+FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 
-LABEL com.redhat.component="ploigos-tool-image-scanner" \
-      name="ploigos/ploigos-tool-image-scanner" \
-      architecture="x86_64" \
-      io.k8s.display-name="Ploigos image-scanner" \
-      io.k8s.description="The Ploigos image-scanner image provides the image-scanner executable" \
-      io.openshift.tags="ploigos,openshift,image-scanner,python,python3,python36" \
-      maintainer="ploigos@redhat.com"
+# labels
+ENV DESCRIPTION="Ploigos tool container with OpenSCAP."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-openscap" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - OpenSCAP" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,oscap,openscap" \
+    com.redhat.component="ploigos-tool-openscap-container"
 
-ENV INSTALL_PKGS="openscap-scanner"
-RUN dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS \
-    && dnf clean all --enablerepo=\*
+RUN INSTALL_PKGS="openscap-scanner" && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
