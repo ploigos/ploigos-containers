@@ -77,7 +77,6 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 
 * ploigos-base
   * ubi8
-  * centos
 * ploigos-base-java-8
   * ubi8
 * ploigos-ci-agent-jenkins
@@ -92,13 +91,12 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
   * ubi8
 * ploigos-tool-containers
   * ubi8
-  * centos
 * ploigos-tool-helm
   * ubi8
 * ploigos-tool-maven
   * ubi8
 * ploigos-tool-openscap
-  * centos
+  * ubi8
 * ploigos-tool-reokor
   * ubi8
 * ploigos-tool-sonar
@@ -107,12 +105,7 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 
 ## Build
 
-The following commands can be used for building these images locally
-
-### With Red Hat Subscription
-The `openscap-scanner` RPM for RHEL is currently only available to those with a Red Hat
-subscription, so to build the `ploigos-tools-openscap` image on ubi8 these commands must be run
-from a RHEL 8 system with valid Red Hat subscriptions.
+The following commands can be used for building these images locally.
 
 ```
 podman build --tag ploigos-base                                                            ploigos-base
@@ -130,29 +123,6 @@ podman build --tag ploigos-tool-rekor       --build-arg BASE_IMAGE=ploigos-base 
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
 ```
 
-### No Red Hat Subscription
-The `openscap-scanner` RPM for RHEL is currently only available to those with a Red Hat
-subscription, so to build the `ploigos-tools-openscap` image without a Red Hat subscription
-centos must be used rather then ubi8 for the base image.
-
-```
-podman build --tag ploigos-base                                                        ploigos-base
-podman build --tag ploigos-base-java-8      --build-arg BASE_IMAGE=ploigos-base        ploigos-base-java-8
-podman build --tag ploigos-ci-agent-jenkins --build-arg BASE_IMAGE=ploigos-base-java-8 ploigos-ci-agent-jenkins
-podman build --tag ploigos-jenkins                                                     ploigos-jenkins
-podman build --tag ploigos-jenkins-init                                                ploigos-jenkins-init
-podman build --tag ploigos-tool-argocd      --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-argocd
-podman build --tag ploigos-tool-config-lint --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-config-lint
-podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-containers
-podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-helm
-podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-base-java-8 ploigos-tool-maven
-podman build --tag ploigos-tool-rekor       --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-rekor
-podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base        ploigos-tool-sonar
-
-podman build -f Containerfile.centos --tag ploigos-base:latest.centos                                                                          ploigos-base
-podman build -f Containerfile.centos --tag ploigos-tool-containers:latest.centos --build-arg BASE_IMAGE=ploigos-base:latest.centos             ploigos-tool-containers
-podman build -f Containerfile.centos --tag ploigos-tool-openscap                 --build-arg BASE_IMAGE=ploigos-tool-containers:latest.centos  ploigos-tool-openscap
-```
 ## Test
 
 > **TODO**
