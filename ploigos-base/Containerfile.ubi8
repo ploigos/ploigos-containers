@@ -73,11 +73,18 @@ RUN alternatives --set python /usr/bin/python3 && \
 RUN python -m pip install --no-cache-dir --upgrade ${PLOIGOS_SOURCE}
 
 # Configure ploigos user
-RUN useradd ploigos --uid $PLOIGOS_USER_UID --gid $PLOIGOS_USER_GID --home-dir ${PLOIGOS_HOME_DIR} --create-home --shell /sbin/nologin && \
-    chown -R $PLOIGOS_USER_UID:${PLOIGOS_USER_GID} ${PLOIGOS_HOME_DIR} && \
+RUN useradd ploigos --uid ${PLOIGOS_USER_UID} --gid ${PLOIGOS_USER_GID} --home-dir ${PLOIGOS_HOME_DIR} --create-home --shell /sbin/nologin && \
+    chown -R ${PLOIGOS_USER_UID}:${PLOIGOS_USER_GID} ${PLOIGOS_HOME_DIR} && \
     chmod -R g+w ${PLOIGOS_HOME_DIR}
 
 # Allow root(0) group to run update-ca-trust extract
 RUN chmod -R g+w /etc/pki/ca-trust/extracted
 
-USER $PLOIGOS_USER_UID
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
+# set entrypoint
+COPY ploigos-base-entrypoint.sh /
+ENTRYPOINT [ "/ploigos-base-entrypoint.sh" ]

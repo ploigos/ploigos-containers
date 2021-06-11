@@ -26,4 +26,7 @@ RUN INSTALL_PKGS="java-1.8.0-openjdk-devel" && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
-USER $PLOIGOS_USER_UID
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}

@@ -20,25 +20,45 @@ Defines a Java 8 base container image, built on top of `ploigos-base`, from whic
 
 Defines a jenkins agent as a sidecar for the `ploigos-tool-*` containers. Built from `ploigos-base-java-8`.
 
+## ploigos-jenkins
+**To be deprecated.**
+
+Custom Jenkins Controller that allows for CA root trust to be updated.
+
+## ploigos-jenkins-init
+**To be deprecated.**
+
+Custom Jenkins init image which installs a preset set of Jenkins plugins.
+
 ## ploigos-tool-argocd
 [![ploigos-tool-argocd](https://img.shields.io/badge/quay.io-ploigos--tool--argocd-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-argocd)
 
 Defines an ArgoCD container image. Built from `ploigos-base`.
 
-## ploigos-tool-containers
-[![ploigos-tool-containers](https://img.shields.io/badge/quay.io-ploigos--tool--containers-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-containers)
-
-> **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
-
-Defines a ci tools container that has tools for working with containers.
-* buildah
-* podman
-* skopeo
-
 ## ploigos-tool-config-lint
 [![ploigos-tool-config-lint](https://img.shields.io/badge/quay.io-ploigos--tool--config--lint-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-config-lint)
 
 Defines a [config-lint](https://github.com/stelligent/config-lint) container image. Built from `ploigos-base`.
+
+## ploigos-tool-containers
+[![ploigos-tool-containers](https://img.shields.io/badge/quay.io-ploigos--tool--containers-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-containers)
+
+Defines a tools container that has tools for working with containers.
+* buildah
+* podman
+* skopeo
+
+Required Capabilities for rootless container building:
+* SETUID
+* SETGID
+
+## ploigos-tool-helm
+[![ploigos-tool-helm](https://img.shields.io/badge/quay.io-ploigos--tool--helm-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-helm)
+
+Defines a tools container that has helm and helpful helm plugins.
+
+Helm Plugins
+* [helm-secrets (SOPS)](https://github.com/zendesk/helm-secrets)
 
 ## ploigos-tool-maven
 [![ploigos-tool-maven](https://img.shields.io/badge/quay.io-ploigos--tool--maven-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-maven)
@@ -48,9 +68,15 @@ Defines a maven container image. Built from `ploigos-base-java-8`.
 ## ploigos-tool-openscap
 [![ploigos-tool-openscap](https://img.shields.io/badge/quay.io-ploigos--tool--openscap-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-openscap)
 
-> **_NOTE:_** This image is not automatically built by GitHub actions because it requires to be built on a subscribed RHEL 8 machine.
-
 Defines an OpenSCAP based image scanning container image. Built from ploigos-base.
+
+## ploigos-tool-rekor
+[![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--rekor-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-rekor)
+
+Defines a tools container that has the tools for doing auto governance. Built from `ploigos-base`.
+
+Tools
+* [rekor](https://github.com/sigstore/rekor)
 
 ## ploigos-tool-sonar
 [![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--sonar-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-sonar)

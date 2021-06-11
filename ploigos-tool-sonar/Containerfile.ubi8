@@ -39,4 +39,7 @@ RUN curl https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/${SONAR
 
 ENV PATH /usr/bin/sonar/bin:$PATH
 
-USER $PLOIGOS_USER_UID
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}

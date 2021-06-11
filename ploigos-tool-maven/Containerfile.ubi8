@@ -29,10 +29,7 @@ RUN INSTALL_PKGS="maven" && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
-# Copy scripts
-ADD contrib/bin/* /usr/local/bin/
-
-USER $PLOIGOS_USER_UID
-
-# Configure maven settings
-ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}

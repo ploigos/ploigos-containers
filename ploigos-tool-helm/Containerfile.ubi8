@@ -43,6 +43,7 @@ RUN export XDG_DATA_HOME="/" \
     && unset XDG_DATA_HOME
 RUN chmod -R g+w ${HELM_PLUGINS_DIR}
 
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
 USER ${PLOIGOS_USER_UID}
-
-ENTRYPOINT [ "/usr/local/bin/helm" ]
