@@ -509,8 +509,8 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} version --client"
-          docker run ${{ env.IMAGE_TAG_LOCAL }} version --client
+          echo "Verify ArgoCD installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} argocd version --client
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
@@ -710,22 +710,22 @@ jobs:
       - name: Test Image 🧪
         run: |
           echo "Check helm is entry point"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} --help
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm --help
 
           echo "Check helm version (this value needs to be updated if default value in container is updated)"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} version
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm version
 
           echo "Check helm-secrets plugin is installed in expected location"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "ls /helm/plugins/helm-secrets"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} ls /helm/plugins/helm-secrets
 
           echo "Check that helm-secrets plugin is installed"
-          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} secrets --help
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm secrets --help
 
           echo "Check that helm-secrets plugin is installed when running as random user"
-          docker run -u 10010042 ${{ env.IMAGE_TAG_LOCAL }} secrets --help
+          docker run -u 10010042 ${{ env.IMAGE_TAG_LOCAL }} helm secrets --help
 
           echo "Check that sops is installed"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "sops --version"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} sops --version
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
@@ -825,11 +825,13 @@ jobs:
       - name: Test Image 🧪
         run: |
           echo "Verify java installed"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "java -version"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
           echo "Verify maven installed"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mvn --version"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
           echo "Verify can create file in ~/.m2"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2; touch ~/.m2/test-settings.xml"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2; touch ~/.m2/test-settings.xml"
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
