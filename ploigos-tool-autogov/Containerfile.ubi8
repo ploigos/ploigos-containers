@@ -1,0 +1,54 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with Rekor."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-openscap" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - Rekor" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,rekor" \
+    com.redhat.component="ploigos-tool-rekor-container"
+
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+USER root
+
+# Copy the entrypoint
+ADD contrib/centos.repo /etc/yum.repos.d/
+
+# update and install packages
+RUN INSTALL_PKGS="golang" && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# Install rekor
+RUN git clone https://github.com/sigstore/rekor.git && \
+    cd rekor && \
+    go build ./cmd/rekor-cli && \
+    mv rekor-cli /usr/local/bin/rekor && \
+    chmod 775 /usr/bin && \
+    chmod 777 /usr/local/bin/rekor && \
+    chown 1001:0 /usr/local/bin/rekor
+
+#Install opa
+RUN curl -L -o opa https://openpolicyagent.org/downloads/v0.29.4/opa_linux_amd64 && \
+    chmod 775 ./opa && \
+    mv opa /usr/bin/
+
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
