@@ -1053,19 +1053,19 @@ jobs:
         run: echo ${{ steps.image_build.outputs.digest }}
 
   ###########################
-  # ploigos-tool-rekor_ubi8 #
+  # ploigos-tool-autogov_ubi8 #
   ###########################
-  ploigos-tool-rekor_ubi8:
+  ploigos-tool-autogov_ubi8:
     needs:
     - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./ploigos-tool-rekor
+      IMAGE_CONTEXT: ./ploigos-tool-autogov
       IMAGE_FILE: Containerfile.ubi8
-      IMAGE_NAME: ploigos-tool-rekor
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-rekor:latest.ubi8
+      IMAGE_NAME: ploigos-tool-autogov
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-autogov:latest.ubi8
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
       BASE_IMAGE_NAME: ploigos-base
@@ -1128,9 +1128,10 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Check rekor binary exists"
-          docker run -u 1001 --entrypoint='' ${{ env.IMAGE_TAG_LOCAL }} /bin/sh -c "rekor --help"
-
+          echo "Check rekor and opa binaries exists"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} rekor --help
+          echo "Check opa binary exists"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} opa --help
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
         with:

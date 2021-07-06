@@ -70,13 +70,14 @@ Defines a maven container image. Built from `ploigos-base-java-8`.
 
 Defines an OpenSCAP based image scanning container image. Built from ploigos-base.
 
-## ploigos-tool-rekor
-[![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--rekor-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-rekor)
+## ploigos-tool-autogov
+[![ploigos-tool-autogov](https://img.shields.io/badge/quay.io-ploigos--tool--autogov-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-autogov)
 
 Defines a tools container that has the tools for doing auto governance. Built from `ploigos-base`.
 
 Tools
 * [rekor](https://github.com/sigstore/rekor)
+* [opa](https://github.com/open-policy-agent)
 
 ## ploigos-tool-sonar
 [![ploigos-tool-sonar](https://img.shields.io/badge/quay.io-ploigos--tool--sonar-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-sonar)
@@ -123,7 +124,7 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
   * ubi8
 * ploigos-tool-openscap
   * ubi8
-* ploigos-tool-reokor
+* ploigos-tool-autogov
   * ubi8
 * ploigos-tool-sonar
   * ubi8
@@ -145,7 +146,7 @@ podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base 
 podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
 podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-base-java-8     ploigos-tool-maven
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
-podman build --tag ploigos-tool-rekor       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-rekor
+podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
 ```
 
