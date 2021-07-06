@@ -4,7 +4,7 @@ FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 
 # labels
-ENV DESCRIPTION="Ploigos tool container with Rekor."
+ENV DESCRIPTION="Ploigos tool container with Rekor and Open Policy Agent."
 LABEL \
     maintainer="Ploigos <ploigos@redhat.com>" \
     name="ploigos/ploigos-tool-openscap" \
@@ -12,11 +12,11 @@ LABEL \
     description="$DESCRIPTION" \
     License="GPLv2+" \
     architecture="x86_64" \
-    io.k8s.display-name="Ploigos - Tool - Rekor" \
+    io.k8s.display-name="Ploigos - Tool - Automated Governance" \
     io.k8s.description="$DESCRIPTION" \
     io.openshift.expose-services="" \
-    io.openshift.tags="ploigos,rekor" \
-    com.redhat.component="ploigos-tool-rekor-container"
+    io.openshift.tags="ploigos,autogov" \
+    com.redhat.component="ploigos-tool-autogov-container"
 
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
@@ -46,7 +46,6 @@ RUN git clone https://github.com/sigstore/rekor.git && \
 RUN curl -L -o opa https://openpolicyagent.org/downloads/v0.29.4/opa_linux_amd64 && \
     chmod 775 ./opa && \
     mv opa /usr/bin/
-
 
 # may not actually be able to run as this user at runtime
 # but platforms like OpenShift will still respect users home directory
