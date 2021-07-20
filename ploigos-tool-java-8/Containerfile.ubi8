@@ -7,7 +7,7 @@ ARG PLOIGOS_USER_UID
 ENV DESCRIPTION="Ploigos Java 8 base container"
 LABEL \
     maintainer="Ploigos <ploigos@redhat.com>" \
-    name="ploigos/ploigos-base-java-8" \
+    name="ploigos/ploigos-tool-java-8" \
     summary="$DESCRIPTION" \
     description="$DESCRIPTION" \
     License="GPLv2+" \
@@ -16,7 +16,7 @@ LABEL \
     io.k8s.description="$DESCRIPTION" \
     io.openshift.expose-services="" \
     io.openshift.tags="ploigos,java" \
-    com.redhat.component="ploigos-base-java-8-container"
+    com.redhat.component="ploigos-tool-java-8-container"
 
 USER root
 # Install headless Java
