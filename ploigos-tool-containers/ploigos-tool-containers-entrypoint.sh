@@ -6,4 +6,4 @@ echo $(whoami):10000:65536 >> /etc/subuid
 echo $(whoami):10000:65536 >> /etc/subgid
 
 # call the base entrypoint
-/ploigos-base-entrypoint.sh $@
+/ploigos-base-entrypoint.sh "$@"
