@@ -10,15 +10,10 @@ Container image definitions for the Ploigos project
 
 Defines the base Ploigos container image, from which all other Ploigos images derive.
 
-## ploigos-base-java-8
-[![ploigos-base-java-8](https://img.shields.io/badge/quay.io-ploigos--base--java--8-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-base)
-
-Defines a Java 8 base container image, built on top of `ploigos-base`, from which many Ploigos tool images derive.
-
 ## ploigos-ci-agent-jenkins
 [![ploigos-ci-agent-jenkins](https://img.shields.io/badge/quay.io-ploigos--ci--agent--jenkins-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-ci-agent-jenkins)
 
-Defines a jenkins agent as a sidecar for the `ploigos-tool-*` containers. Built from `ploigos-base-java-8`.
+Defines a jenkins agent as a sidecar for the `ploigos-tool-*` containers. Built from `ploigos-tool-java-8`.
 
 ## ploigos-jenkins
 **To be deprecated.**
@@ -60,10 +55,15 @@ Defines a tools container that has helm and helpful helm plugins.
 Helm Plugins
 * [helm-secrets (SOPS)](https://github.com/zendesk/helm-secrets)
 
+## ploigos-tool-java-8
+[![ploigos-tool-java-8](https://img.shields.io/badge/quay.io-ploigos--tool--java--8-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-java-8)
+
+Defines a Java 8 base container image, built on top of `ploigos-base`, from which many Ploigos tool images derive.
+
 ## ploigos-tool-maven
 [![ploigos-tool-maven](https://img.shields.io/badge/quay.io-ploigos--tool--maven-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-maven)
 
-Defines a maven container image. Built from `ploigos-base-java-8`.
+Defines a maven container image. Built from `ploigos-tool-java-8`.
 
 ## ploigos-tool-openscap
 [![ploigos-tool-openscap](https://img.shields.io/badge/quay.io-ploigos--tool--openscap-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-openscap)
@@ -104,7 +104,7 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 
 * ploigos-base
   * ubi8
-* ploigos-base-java-8
+* ploigos-tool-java-8
   * ubi8
 * ploigos-ci-agent-jenkins
   * ubi8
@@ -136,15 +136,15 @@ The following commands can be used for building these images locally.
 
 ```
 podman build --tag ploigos-base                                                            ploigos-base
-podman build --tag ploigos-base-java-8      --build-arg BASE_IMAGE=ploigos-base            ploigos-base-java-8
-podman build --tag ploigos-ci-agent-jenkins --build-arg BASE_IMAGE=ploigos-base-java-8     ploigos-ci-agent-jenkins
+podman build --tag ploigos-ci-agent-jenkins --build-arg BASE_IMAGE=ploigos-tool-java-8     ploigos-ci-agent-jenkins
 podman build --tag ploigos-jenkins                                                         ploigos-jenkins
 podman build --tag ploigos-jenkins-init                                                    ploigos-jenkins-init
 podman build --tag ploigos-tool-argocd      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-argocd
 podman build --tag ploigos-tool-config-lint --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-config-lint
 podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-containers
 podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
-podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-base-java-8     ploigos-tool-maven
+podman build --tag ploigos-tool-java-8      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java-8
+podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-tool-java-8     ploigos-tool-maven
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
 podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar

@@ -139,19 +139,19 @@ jobs:
         run: echo ${{ steps.image_build.outputs.digest }}
 
   #############################
-  # ploigos-base-java-8_ubi8  #
+  # ploigos-tool-java-8_ubi8  #
   #############################
-  ploigos-base-java-8_ubi8 :
+  ploigos-tool-java-8_ubi8 :
     needs:
     - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./ploigos-base-java-8
+      IMAGE_CONTEXT: ./ploigos-tool-java-8
       IMAGE_FILE: Containerfile.ubi8
-      IMAGE_NAME: ploigos-base-java-8
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base-java-8:latest.ubi8
+      IMAGE_NAME: ploigos-tool-java-8
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-java-8:latest.ubi8
       BASE_IMAGE_NAME: ploigos-base
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
@@ -243,7 +243,7 @@ jobs:
   ##################################
   ploigos-ci-agent-jenkins_ubi8:
     needs:
-    - ploigos-base-java-8_ubi8
+    - ploigos-tool-java-8_ubi8
 
     runs-on: ubuntu-latest
 
@@ -252,7 +252,7 @@ jobs:
       IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-ci-agent-jenkins
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest.ubi8
-      BASE_IMAGE_NAME: ploigos-base-java-8
+      BASE_IMAGE_NAME: ploigos-tool-java-8
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
 
@@ -753,7 +753,7 @@ jobs:
   ###########################
   ploigos-tool-maven_ubi8:
     needs:
-    - ploigos-base-java-8_ubi8
+    - ploigos-tool-java-8_ubi8
 
     runs-on: ubuntu-latest
 
@@ -764,7 +764,7 @@ jobs:
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest.ubi8
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
-      BASE_IMAGE_NAME: ploigos-base-java-8
+      BASE_IMAGE_NAME: ploigos-tool-java-8
 
     services:
       registry:
