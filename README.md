@@ -145,6 +145,7 @@ podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base 
 podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
 podman build --tag ploigos-tool-java-8      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java-8
 podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-tool-java-8     ploigos-tool-maven
+podman build --tag ploigos-tool-jkube       --build-arg BASE_IMAGE=ploigos-tool-maven      ploigos-tool-jkube
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
 podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar

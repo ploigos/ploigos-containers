@@ -1,0 +1,55 @@
+# This image is based on the following Dockerfiles:
+# https://catalog.redhat.com/software/containers/rhel8/buildah/5dca3d76dd19c71643b226d5?container-tabs=dockerfile
+# https://github.com/containers/buildah/blob/master/contrib/buildahimage/stable/Dockerfile
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-maven:latest.ubi8
+ARG GO_VERSION=1.12.17
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG GO_VERSION
+
+# labels
+ENV DESCRIPTION="Ploigos tool container used to do JKube builds. Has both Maven and container tools."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-jkbue" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - JKube" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,podman,skopeo,buildah,maven,jkube" \
+    com.redhat.component="ploigos-tool-containers-container"
+
+# NOTE This image must run priviliged
+USER root
+
+# update and install packages
+# NOTE: need to reinstall shadow-utils because of
+# * https://github.com/containers/buildah/issues/3053#issuecomment-790031931
+RUN INSTALL_PKGS="buildah podman skopeo" && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf reinstall -y shadow-utils && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# allow for subgid and subuid to be set at runtime for random UIDs
+# needed to allow for buildah to call newgidmap and newuidmap
+RUN chmod g+rw /etc/subgid /etc/subuid
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER $PLOIGOS_USER_UID
+
+# Set up environment variables to note that this is
+# not starting with usernamespace and default to
+# isolate the filesystem with chroot.
+ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot
+
+# set custom entrypoint which also calls the base entrypoint
+COPY ploigos-tool-jkube-entrypoint.sh /
+ENTRYPOINT [ "/ploigos-tool-jkube-entrypoint.sh" ]
