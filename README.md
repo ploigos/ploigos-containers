@@ -127,6 +127,8 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
   * ubi8
 * ploigos-tool-maven
   * ubi8
+* ploigos-tool-nodejs
+  * ubi8  
 * ploigos-tool-openscap
   * ubi8
 * ploigos-tool-autogov
