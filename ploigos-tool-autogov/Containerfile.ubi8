@@ -1,7 +1,11 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG REKOR_VERSION=e63fe717c810657c270edfb964aef10969e7f210
+ARG OPA_VERSION=v0.29.4
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
+ARG REKOR_VERSION
+ARG OPA_VERSION
 
 # labels
 ENV DESCRIPTION="Ploigos tool container with Rekor and Open Policy Agent."
@@ -34,8 +38,12 @@ RUN INSTALL_PKGS="golang" && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
 # Install rekor
+# NOTE: better way to install, except as of 7/21/21 only v0.2.0 is released and it doesnt work with PSR
+#RUN curl -L https://github.com/sigstore/rekor/releases/download/${REKOR_VERSION}/rekor-cli -o /usr/bin/rekor && \
+#    chmod +x /usr/bin/rekor
 RUN git clone https://github.com/sigstore/rekor.git && \
     cd rekor && \
+    git checkout ${REKOR_VERSION} && \
     go build ./cmd/rekor-cli && \
     mv rekor-cli /usr/local/bin/rekor && \
     chmod 775 /usr/bin && \
@@ -43,9 +51,8 @@ RUN git clone https://github.com/sigstore/rekor.git && \
     chown 1001:0 /usr/local/bin/rekor
 
 #Install opa
-RUN curl -L -o opa https://openpolicyagent.org/downloads/v0.29.4/opa_linux_amd64 && \
-    chmod 775 ./opa && \
-    mv opa /usr/bin/
+RUN curl -L https://openpolicyagent.org/downloads/${OPA_VERSION}/opa_linux_amd64 -o /usr/bin/opa && \
+    chmod +x /usr/bin/opa
 
 # may not actually be able to run as this user at runtime
 # but platforms like OpenShift will still respect users home directory
