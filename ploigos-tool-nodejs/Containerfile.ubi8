@@ -20,10 +20,9 @@ LABEL \
 
 USER root
 
-# update and install packages
 RUN INSTALL_PKGS="nodejs" && \
     dnf update -y --allowerasing --nobest && \
-    dnf module enable -y nodejs:13 && \
+    dnf module enable -y $INSTALL_PKGS && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
