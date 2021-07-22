@@ -1488,20 +1488,20 @@ jobs:
         run: echo ${{ steps.image_build.outputs.digest }}
 
   ##################################
-  # ploigos-tool-nodejs_ubi8       #
+  # ploigos-tool-javascript_ubi8       #
   ##################################
-  ploigos-tool-nodejs_ubi8:
+  ploigos-tool-javascript_ubi8:
     needs:
     - ploigos-base_ubi8
 
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_CONTEXT: ./ploigos-tool-nodejs
+      IMAGE_CONTEXT: ./ploigos-tool-javascript
       IMAGE_FILE: Containerfile.ubi8
-      IMAGE_NAME: ploigos-tool-nodejs
-      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-nodejs:latest.ubi8
-      BASE_IMAGE_NAME: ploigos-tool-nodejs
+      IMAGE_NAME: ploigos-tool-javascript
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-javascript:latest.ubi8
+      BASE_IMAGE_NAME: ploigos-tool-javascript
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
 

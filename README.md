@@ -65,10 +65,10 @@ Defines a Java 8 base container image, built on top of `ploigos-base`, from whic
 
 Defines a maven container image. Built from `ploigos-tool-java-8`.
 
-## ploigos-tool-npm
-[![ploigos-tool-npm](https://img.shields.io/badge/quay.io-ploigos--tool--npm-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-npm)
+## ploigos-tool-javascript
+[![ploigos-tool-javascript](https://img.shields.io/badge/quay.io-ploigos--tool--javascript-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-javascript)
 
-Defines a npm container image. Built from `ploigos-base`.
+Defines a javascript container image. Built from `ploigos-base`.
 
 ## ploigos-tool-openscap
 [![ploigos-tool-openscap](https://img.shields.io/badge/quay.io-ploigos--tool--openscap-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-openscap)
@@ -127,7 +127,7 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
   * ubi8
 * ploigos-tool-maven
   * ubi8
-* ploigos-tool-nodejs
+* ploigos-tool-javascript
   * ubi8  
 * ploigos-tool-openscap
   * ubi8
@@ -152,7 +152,7 @@ podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base 
 podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
 podman build --tag ploigos-tool-java-8      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java-8
 podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-tool-java-8     ploigos-tool-maven
-podman build --tag ploigos-tool-nodejs      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-nodejs
+podman build --tag ploigos-tool-javascript  --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-javascript
 podman build --tag ploigos-tool-jkube       --build-arg BASE_IMAGE=ploigos-tool-maven      ploigos-tool-jkube
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
 podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov

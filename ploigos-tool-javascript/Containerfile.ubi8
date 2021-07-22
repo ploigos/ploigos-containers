@@ -4,19 +4,19 @@ FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 
 # labels
-ENV DESCRIPTION="Ploigos tool container with npm."
+ENV DESCRIPTION="Ploigos tool container with javascript."
 LABEL \
     maintainer="Ploigos <ploigos@redhat.com>" \
-    name="ploigos/ploigos-tool-npm" \
+    name="ploigos/ploigos-tool-javascript" \
     summary="$DESCRIPTION" \
     description="$DESCRIPTION" \
     License="GPLv2+" \
     architecture="x86_64" \
-    io.k8s.display-name="Ploigos - Tool - npm" \
+    io.k8s.display-name="Ploigos - Tool - javascript" \
     io.k8s.description="$DESCRIPTION" \
     io.openshift.expose-services="" \
-    io.openshift.tags="ploigos,npm" \
-    com.redhat.component="ploigos-tool-npm-container"
+    io.openshift.tags="ploigos,javascript" \
+    com.redhat.component="ploigos-tool-javascript-container"
 
 USER root
 
