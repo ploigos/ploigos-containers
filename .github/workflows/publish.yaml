@@ -1488,7 +1488,7 @@ jobs:
         run: echo ${{ steps.image_build.outputs.digest }}
 
   ##################################
-  # ploigos-tool-javascript_ubi8       #
+  # ploigos-tool-javascript_ubi8   #
   ##################################
   ploigos-tool-javascript_ubi8:
     needs:
