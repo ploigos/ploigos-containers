@@ -1563,8 +1563,9 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client"
-          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} javascript cli tools"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} npm --help
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} node --help
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
