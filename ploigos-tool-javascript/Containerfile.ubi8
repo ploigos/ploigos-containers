@@ -1,7 +1,11 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG NODEJS_STREAM=12
+ARG NODEJS_PROFILE=common
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
+ARG NODEJS_STREAM
+ARG NODEJS_PROFILE
 
 # labels
 ENV DESCRIPTION="Ploigos tool container with javascript."
@@ -20,10 +24,8 @@ LABEL \
 
 USER root
 
-RUN INSTALL_PKGS="nodejs" && \
-    dnf update -y --allowerasing --nobest && \
-    dnf module enable -y $INSTALL_PKGS && \
-    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+RUN dnf update -y --allowerasing --nobest && \
+    dnf module install -y --setopt=tsflags=nodocs nodejs:${NODEJS_STREAM}/${NODEJS_PROFILE} && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
