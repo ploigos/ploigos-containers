@@ -1501,7 +1501,7 @@ jobs:
       IMAGE_FILE: Containerfile.ubi8
       IMAGE_NAME: ploigos-tool-javascript
       IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-javascript:latest.ubi8
-      BASE_IMAGE_NAME: ploigos-tool-javascript
+      BASE_IMAGE_NAME: ploigos-base
       IMAGE_TAG_FLAVOR: .ubi8
       IMAGE_IS_DEFAULT_FLAVOR: true
 
