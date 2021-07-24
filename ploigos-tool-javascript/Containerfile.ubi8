@@ -1,0 +1,35 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG NODEJS_STREAM=12
+ARG NODEJS_PROFILE=common
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG NODEJS_STREAM
+ARG NODEJS_PROFILE
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with javascript."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-javascript" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - javascript" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,javascript" \
+    com.redhat.component="ploigos-tool-javascript-container"
+
+USER root
+
+RUN dnf update -y --allowerasing --nobest && \
+    dnf module install -y --setopt=tsflags=nodocs nodejs:${NODEJS_STREAM}/${NODEJS_PROFILE} && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
