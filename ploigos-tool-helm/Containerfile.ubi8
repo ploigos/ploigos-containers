@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
 ARG HELM_PLUGINS_DIR=/helm/plugins
 ARG HELM_VERSION=v3.3.4
-ARG HELM_PLUGIN_HELM_SECRETS_VERSION=v2.0.2
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION=v3.8.2
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
@@ -39,7 +39,7 @@ RUN mkdir -p ${HELM_PLUGINS_DIR} && \
     chmod g+rwx ${HELM_PLUGINS_DIR}
 ENV HELM_PLUGINS=${HELM_PLUGINS_DIR}
 RUN export XDG_DATA_HOME="/" \
-    && helm plugin install https://github.com/zendesk/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
+    && helm plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
     && unset XDG_DATA_HOME
 RUN chmod -R g+w ${HELM_PLUGINS_DIR}
 
