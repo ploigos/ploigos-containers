@@ -1,10 +1,12 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG JAVA_VERSION=11
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
+ARG JAVA_VERSION
 
 # labels
-ENV DESCRIPTION="Ploigos Java 8 base container"
+ENV DESCRIPTION="Ploigos Java ${JAVA_VERSION} base container"
 LABEL \
     maintainer="Ploigos <ploigos@redhat.com>" \
     name="ploigos/ploigos-tool-java-8" \
@@ -12,15 +14,15 @@ LABEL \
     description="$DESCRIPTION" \
     License="GPLv2+" \
     architecture="x86_64" \
-    io.k8s.display-name="Ploigos - Base - Java 8" \
+    io.k8s.display-name="Ploigos - Base - Java ${JAVA_VERSION}" \
     io.k8s.description="$DESCRIPTION" \
     io.openshift.expose-services="" \
     io.openshift.tags="ploigos,java" \
-    com.redhat.component="ploigos-tool-java-8-container"
+    com.redhat.component="ploigos-tool-java-${JAVA_VERSION}-container"
 
 USER root
 # Install headless Java
-RUN INSTALL_PKGS="java-1.8.0-openjdk-devel" && \
+RUN INSTALL_PKGS="java-${JAVA_VERSION}-openjdk-devel" && \
     dnf update -y --allowerasing --nobest && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     dnf clean all && \
