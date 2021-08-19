@@ -89,6 +89,11 @@ Tools
 
 Defines a sonar-scanner container image. Built from `ploigos-base`.
 
+## argocd-repo-server-sops
+
+Layers [sops](https://github.com/mozilla/sops) and the [helm-secrets](https://github.com/jkroepke/helm-secrets) plugin  ontop of the base argocd-repo-server image.
+
+
 # Automatic Build, Test, and Publish
 
 The following github events to this repository will cause the
@@ -157,6 +162,7 @@ podman build --tag ploigos-tool-jkube       --build-arg BASE_IMAGE=ploigos-tool-
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
 podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
+podman build --tag argocd-repo-server-sops  argocd-repo-server-sops
 ```
 
 ## Test

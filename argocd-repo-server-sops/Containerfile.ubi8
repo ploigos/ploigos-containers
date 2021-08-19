@@ -1,0 +1,36 @@
+FROM registry.redhat.io/openshift-gitops-1/argocd-rhel8@sha256:3e6521a3610b23dce99f4eb643171ac9172808e86f3ca4154f5d548a286bb95f
+
+ARG SOPS_VERSION="3.7.1"
+ARG HELM_SECRETS_VERSION="3.8.3"
+ARG SOPS_RPM="https://github.com/mozilla/sops/releases/download/v${SOPS_VERSION}/sops-${SOPS_VERSION}-1.x86_64.rpm"
+ARG HELM_PLUGINS_DIR="/helm-plugins"
+
+USER root
+
+# Install packages
+RUN rpm -i ${SOPS_RPM}
+RUN INSTALL_PKGS="findutils" && \
+    microdnf update -y --nobest && \
+    microdnf install -y --setopt=tsflags=nodocs ${INSTALL_PKGS} && \
+    microdnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# Install helm wrapper
+# NOTE: this magic works because /usr/local/bin is first on path before /usr/bin
+COPY helm-wrapper.sh /usr/local/bin/helm
+RUN chmod +x /usr/local/bin/helm
+
+# create a place to install helm plugins that isn't tied to a user
+ENV HELM_PLUGINS="${HELM_PLUGINS_DIR}"
+RUN mkdir ${HELM_PLUGINS_DIR} \
+    && chmod a+rw ${HELM_PLUGINS_DIR}
+
+# install plugins
+RUN helm plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_SECRETS_VERSION}
+
+# HACK: for some reason the helm plugin install is not respecting the HELM_PLUGINS env variable
+#	so manually copying the plugins to where we want them
+RUN cp -r ~/.local/share/helm/plugins/* ${HELM_PLUGINS_DIR}/
+
+USER argocd
+
