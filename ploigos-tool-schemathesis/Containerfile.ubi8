@@ -1,0 +1,39 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG PLOIGOS_USER_UID=1001
+ARG SCHEMATHESIS_TOOL=schemathesis
+
+##############################################
+# Stage 1 : Build ploigos-base
+##############################################
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG SCHEMATHESIS_TOOL
+
+# labels
+ENV DESCRIPTION="Ploigos schematheses api test container."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-schemathesis" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Schemathesis" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos" \
+    com.redhat.component="ploigos-tool-schemthesis-container"
+
+ENV HOME=/home/ploigos \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8
+USER root
+
+# Install Ploigos step runner python library
+RUN python -m pip install --no-cache-dir --upgrade ${SCHEMATHESIS_TOOL}
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
