@@ -22,14 +22,14 @@ LABEL \
     io.k8s.description="$DESCRIPTION" \
     io.openshift.expose-services="" \
     io.openshift.tags="ploigos" \
-    com.redhat.component="ploigos-tool-schemthesis-container"
+    com.redhat.component="ploigos-tool-schemathesis-container"
 
-ENV HOME=/home/ploigos \
-    LC_ALL=C.UTF-8 \
+ENV LC_ALL=C.UTF-8 \
     LANG=C.UTF-8
+
 USER root
 
-# Install Ploigos step runner python library
+# Install Schemathesis API Testing tool
 RUN python -m pip install --no-cache-dir --upgrade ${SCHEMATHESIS_TOOL}
 
 # may not actually be able to run as this user at runtime

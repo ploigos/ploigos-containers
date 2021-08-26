@@ -1664,8 +1664,8 @@ jobs:
 
       - name: Test Image 🧪
         run: |
-          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} schemathesis"
-          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} schemathesis --version
+          echo "Verify schemathesis cli installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} schemathesis --version
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
