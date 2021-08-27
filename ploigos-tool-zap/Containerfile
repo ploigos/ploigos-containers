@@ -1,0 +1,36 @@
+FROM quay.io/ploigos/ploigos-tool-java-8:latest
+LABEL maintainer="Deven Phillips <deven.phillips@redhat.com>"
+
+ARG ZAPROXY_VERSION="2.10.0"
+ARG ZAPROXY_ADDONS="ascanrulesBeta sqliplugin domxss openapi pscanrulesBeta automation"
+
+USER root
+RUN mkdir -p /zap/wrk 
+
+ENV PATH=$PATH:/zap \
+    ZAP_PATH=/zap/zap.sh \
+    ZAP_PORT=8080
+
+WORKDIR /zap
+RUN mkdir -p /home/.ZAP && \
+    chown 1001:1001 /home/.ZAP -R && \
+    curl -sL https://github.com/zaproxy/zaproxy/releases/download/v${ZAPROXY_VERSION}/ZAP_${ZAPROXY_VERSION}_Linux.tar.gz | tar zx --strip-components=1 && \
+    touch AcceptedLicense && \
+    git clone --depth 1 --branch v${ZAPROXY_VERSION} https://github.com/zaproxy/zaproxy /tmp/zaproxy && \
+    rsync -av /tmp/zaproxy/docker/{policies,scripts,zap*} /zap/ && \
+    rsync -av /tmp/zaproxy/docker/policies ${HOME}/.ZAP/ && \
+    rm -rf /tmp/zaproxy && \
+    touch /.dockerenv && \
+    chown root:root /zap -R && \
+    chmod 777 /zap -R
+
+ADD entrypoint.sh /entrypoint.sh
+ADD updateAddons.sh /updateAddons.sh
+
+RUN chmod 755 /entrypoint.sh
+
+USER 1001
+
+RUN /updateAddons.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
