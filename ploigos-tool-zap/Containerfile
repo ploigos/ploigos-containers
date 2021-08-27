@@ -32,5 +32,3 @@ RUN chmod 755 /entrypoint.sh
 USER 1001
 
 RUN /updateAddons.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
