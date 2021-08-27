@@ -24,10 +24,7 @@ RUN mkdir -p /home/.ZAP && \
     chown root:root /zap -R && \
     chmod 777 /zap -R
 
-ADD entrypoint.sh /entrypoint.sh
 ADD updateAddons.sh /updateAddons.sh
-
-RUN chmod 755 /entrypoint.sh
 
 USER 1001
 
