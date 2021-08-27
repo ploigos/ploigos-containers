@@ -1665,6 +1665,7 @@ jobs:
       - name: Test Image 🧪
         run: |
           echo "Running: docker run --entrypoint=/zap/zap.sh ${{ env.IMAGE_TAG_LOCAL }} -dir /home/.ZAP -cmd -h"
+          docker run --entrypoint=/zap/zap.sh ${{ env.IMAGE_TAG_LOCAL }} -dir /home/.ZAP -cmd -h
 
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
