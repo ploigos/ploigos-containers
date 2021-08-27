@@ -1,0 +1,176 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG NODEJS_STREAM=14
+ARG NODEJS_PROFILE=common
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG NODEJS_STREAM
+ARG NODEJS_PROFILE
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with javascript and cypress CLI."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-cypress" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - javascript - cypress" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,javascript,cypress" \
+    com.redhat.component="ploigos-tool-cypress-container"
+
+USER root
+
+## Install node/npm
+RUN dnf update -y --allowerasing --nobest && \
+    dnf module install -y --setopt=tsflags=nodocs nodejs:${NODEJS_STREAM}/${NODEJS_PROFILE} && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+##
+## Install dependencies
+## From official Cypress documentation: xorg-x11-server-Xvfb gtk2-devel gtk3-devel libnotify-devel GConf2 nss libXScrnSaver alsa-lib
+## But for now using this as a guide: https://github.com/cypress-io/cypress-docker-images/blob/master/base/centos7-12.4.0/Dockerfile
+
+RUN yum update
+RUN yum install -y gcc-c++ make
+RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+
+RUN yum install -y yum-utils
+RUN yum-config-manager --add-repo http://ftp.heanet.ie/pub/centos/8/AppStream/x86_64/os/
+RUN yum install -y xorg-x11-server-Xvfb --nogpgcheck
+#RUN yum install -y xorg-x11-xauth --nogpgcheck
+RUN yum-config-manager --disable ftp.heanet.ie_pub_centos_8_AppStream_x86_64_os_
+
+# note:
+#   Gtk2 for Cypress < 3.3.0
+#   Gtk3 for Cypress >= 3.3.0
+RUN yum install -y gtk2-2.24*
+RUN yum install -y gtk3-3.22*
+RUN yum install -y libXtst*
+# provides libXss
+RUN yum install -y libXScrnSaver*
+# provides libgconf-2
+RUN yum install -y GConf2*
+# provides libasound
+RUN yum install -y alsa-lib*
+
+RUN npm install yarn -g
+
+# there is some dependency I cannot figure out missing
+# which gets installed when installing "git*"
+RUN yum install -y git*
+
+# ########## END Dependencies Install ###########
+
+
+##
+## Install google chrome and its needed dependencies
+##
+RUN yum-config-manager --add-repo http://ftp.heanet.ie/pub/centos/8/BaseOS/x86_64/os/
+RUN yum install -y liberation-fonts --nogpgcheck
+RUN yum-config-manager --disable ftp.heanet.ie_pub_centos_8_BaseOS_x86_64_os_
+
+RUN yum-config-manager --add-repo http://ftp.heanet.ie/pub/centos/8/AppStream/x86_64/os/
+RUN yum install -y xdg-utils --nogpgcheck
+RUN yum install -y vulkan-loader --nogpgcheck
+RUN yum-config-manager --disable ftp.heanet.ie_pub_centos_8_AppStream_x86_64_os_
+
+## install Chrome browser
+RUN yum install -y wget
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+RUN yum localinstall -y google-chrome-stable_current_*.rpm --nogpgcheck
+RUN rm -rf google-chrome-stable_current_*.rpm
+
+# ########## END Chrome Install ###########
+
+
+## a few environment variables to make NPM installs easier
+## good colors for most applications
+ENV TERM xterm
+## avoid million NPM install messages
+ENV npm_config_loglevel warn
+## allow installing when the main user is root
+ENV npm_config_unsafe_perm true
+
+
+##
+## Install Cypress CLI ??
+##
+
+
+# # Update the dependencies to get the latest and greatest (and safest!) packages.
+# RUN apt update && apt upgrade -y
+
+# # avoid too many progress messages
+# # https://github.com/cypress-io/cypress/issues/1243
+ENV CI=1
+
+# # disable shared memory X11 affecting Cypress v4 and Chrome
+# # https://github.com/cypress-io/cypress-docker-images/issues/270
+ENV QT_X11_NO_MITSHM=1
+ENV _X11_NO_MITSHM=1
+ENV _MITSHM=0
+
+# # should be root user
+# RUN echo "whoami: $(whoami)"
+# RUN npm config -g set user $(whoami)
+
+# # command "id" should print:
+# # uid=0(root) gid=0(root) groups=0(root)
+# # which means the current user is root
+# RUN id
+
+# point Cypress at the /root/cache no matter what user account is used
+# see https://on.cypress.io/caching
+
+ENV CYPRESS_CACHE_FOLDER=/root/.cache/Cypress
+RUN npm install -g "cypress@7.7.0"
+RUN cypress verify
+
+# Cypress cache and installed version
+# should be in the root user's home folder
+RUN cypress cache path
+RUN cypress cache list
+RUN cypress info
+RUN cypress version
+
+# give every user read access to the "/root" folder where the binary is cached
+# we really only need to worry about the top folder, fortunately
+RUN ls -la /root
+RUN chmod 755 /root
+
+# # always grab the latest Yarn
+# # otherwise the base image might have old versions
+# # NPM does not need to be installed as it is already included with Node.
+# RUN npm i -g yarn@latest
+
+# # Show where Node loads required modules from
+# RUN node -p 'module.paths'
+
+# should print Cypress version
+# plus Electron and bundled Node versions
+RUN cypress version
+
+
+# ENTRYPOINT ["cypress", "run"]
+
+# ########## END Cypress Install ###########
+
+
+
+# versions of local tools
+RUN echo  " node version:    $(node -v) \n" \
+  "npm version:     $(npm -v) \n" \
+  "yarn version:    $(yarn -v) \n" \
+  "rhel version:  $(cat /etc/redhat-release) \n" \
+  "chrome version:  $(google-chrome --version) \n" \
+  "user:            $(whoami) \n"
+
+# # may not actually be able to run as this user at runtime
+# # but platforms like OpenShift will still respect users home directory
+# # so still worth setting
+# USER ${PLOIGOS_USER_UID}
