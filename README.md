@@ -173,7 +173,7 @@ podman build --tag ploigos-tool-jkube       --build-arg BASE_IMAGE=ploigos-tool-
 podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
 podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
 podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
-podman build --tag argocd-repo-server-sops  argocd-repo-server-sops
+podman build --tag argocd-repo-server-sops  argocd-repo-server-sops -f ./Containerfile.ubi8
 ```
 
 ## Test
