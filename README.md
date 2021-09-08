@@ -42,6 +42,7 @@ Defines a tools container that has tools for working with containers.
 * buildah
 * podman
 * skopeo
+* [s2i](https://github.com/openshift/source-to-image)
 
 Required Capabilities for rootless container building:
 * SETUID

@@ -2,14 +2,16 @@
 # https://catalog.redhat.com/software/containers/rhel8/buildah/5dca3d76dd19c71643b226d5?container-tabs=dockerfile
 # https://github.com/containers/buildah/blob/master/contrib/buildahimage/stable/Dockerfile
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
-ARG GO_VERSION=1.12.17
+ARG S2I_VERSION=v1.3.1
+ARG S2I_BUILD_VERSION=a5a77147
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
-ARG GO_VERSION
+ARG S2I_VERSION
+ARG S2I_BUILD_VERSION
 
 # labels
-ENV DESCRIPTION="Ploigos tool container with container tools, skopeo, buildah, and podman."
+ENV DESCRIPTION="Ploigos tool container with container tools, skopeo, buildah, podman, s2i."
 LABEL \
     maintainer="Ploigos <ploigos@redhat.com>" \
     name="ploigos/ploigos-tool-containers" \
@@ -36,6 +38,18 @@ RUN INSTALL_PKGS="buildah podman skopeo" && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
+# install s2i
+WORKDIR /usr/local/bin
+RUN curl -L https://github.com/openshift/source-to-image/releases/download/${S2I_VERSION}/source-to-image-${S2I_VERSION}-${S2I_BUILD_VERSION}-linux-amd64.tar.gz --output s2i.tar.gz && \
+    tar xzf ./s2i.tar.gz && \
+    rm ./s2i.tar.gz && \
+    chmod 775 ./s2i && \
+    chown ${PLOIGOS_USER_UID}:0 ./s2i
+WORKDIR /
+
+# NOTE: don't know why this is needed but the permisisons on /usr/local/bin keep getting messed up
+RUN chmod a+rx /usr/local/bin
+
 # allow for subgid and subuid to be set at runtime for random UIDs
 # needed to allow for buildah to call newgidmap and newuidmap
 RUN chmod g+rw /etc/subgid /etc/subuid
@@ -43,7 +57,7 @@ RUN chmod g+rw /etc/subgid /etc/subuid
 # may not actually be able to run as this user at runtime
 # but platforms like OpenShift will still respect users home directory
 # so still worth setting
-USER $PLOIGOS_USER_UID
+USER ${PLOIGOS_USER_UID}
 
 # set up environment variables for use by podman/buildah/skopeo to be able to run as rootless
 ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot STORAGE_DRIVER="vfs"
