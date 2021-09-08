@@ -10,6 +10,7 @@ Included CLI tools:
 * `buildah`
 * `podman`
 * `skopeo`
+* `s2i`
 ## Local Build
 
 To build and push this image perform the following on a properly subscribed RHEL 8 host:

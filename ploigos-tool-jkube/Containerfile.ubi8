@@ -49,7 +49,7 @@ USER $PLOIGOS_USER_UID
 ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot STORAGE_DRIVER="vfs"
 
 # set up environment variables for podman service to be used by jkube
-ENV DOCKER_HOST="unix:/home/ploigos/podman.sock"
+ENV DOCKER_HOST="unix:///home/ploigos/podman.sock"
 
 # set custom entrypoint which also calls the base entrypoint
 COPY ploigos-tool-jkube-entrypoint.sh /

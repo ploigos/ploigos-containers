@@ -1871,6 +1871,9 @@ jobs:
           echo "test buildah"
           docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
 
+          echo "test s2i"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} s2i version
+
       - name: Login to External Registry 🔑
         uses: docker/login-action@v1
         with:
