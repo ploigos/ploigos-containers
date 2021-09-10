@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-javascript:latest.ubi8
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
