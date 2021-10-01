@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-java:latest.java11.ubi8
 ARG NODEJS_STREAM=12
 ARG NODEJS_PROFILE=common
 
