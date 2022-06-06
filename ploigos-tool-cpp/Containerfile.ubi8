@@ -1,0 +1,44 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID=1001
+
+# labels
+ENV DESCRIPTION="Ploigos tool container C & C++ Development Tools "
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-cpp-dev" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - C & C++ Development Tools" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,c,cpp,make,gnu" \
+    com.redhat.component="ploigos-tool-cpp-dev-container"
+
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+USER root
+
+# Copy the entrypoint
+ADD contrib/centos.repo /etc/yum.repos.d/
+
+# update and install packages
+RUN yum install gcc && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
+#podman run -it --rm -v $(pwd):/tmp/src:Z
+# https://github.com/sabre1041/ansible-runner-podman/blob/main/Dockerfile
+# line 6,7,8
+#/etc/pki/
