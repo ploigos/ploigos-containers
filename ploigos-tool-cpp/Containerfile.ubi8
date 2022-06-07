@@ -1,7 +1,8 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
 
 FROM $BASE_IMAGE
-ARG PLOIGOS_USER_UID=1001
+ARG GOOGLE_TEST_RELEASE="release-1.11.0"
+ARG PLOIGOS_USER_UID
 
 # labels
 ENV DESCRIPTION="Ploigos tool container C & C++ Development Tools "
@@ -23,22 +24,23 @@ ENV LANG=en_US.UTF-8 \
 
 USER root
 
-# Copy the entrypoint
-ADD contrib/centos.repo /etc/yum.repos.d/
-
 # update and install packages
-RUN yum install gcc && \
+RUN INSTALL_PKGS="cmake gcc gcc-c++ make" &&  \
     dnf update -y --allowerasing --nobest && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     dnf clean all && \
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
+# Install Google Test Framework (https://github.com/google/googletest/blob/main/googletest/README.md)
+# RUN git clone https://github.com/google/googletest.git -b ${GOOGLE_TEST_RELEASE} && \
+#     cd googletest && \
+#     mkdir build && \
+#     cd build && \
+#     cmake .. && \
+#     make && \
+#     make install
+
 # may not actually be able to run as this user at runtime
 # but platforms like OpenShift will still respect users home directory
 # so still worth setting
 USER ${PLOIGOS_USER_UID}
-
-#podman run -it --rm -v $(pwd):/tmp/src:Z
-# https://github.com/sabre1041/ansible-runner-podman/blob/main/Dockerfile
-# line 6,7,8
-#/etc/pki/
