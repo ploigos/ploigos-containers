@@ -1,5 +1,5 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-java-8:latest.ubi8
-ARG MAVEN_VERSION=3.8.5
+ARG MAVEN_VERSION=3.8.6
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
@@ -26,7 +26,7 @@ USER root
 
 # install maven
 # NOTE: installing from upstream because version shipped in UBI repos is ancient (3.5) as of 7/23/21
-RUN curl -L https://downloads.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
+RUN curl -L https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
       -o /usr/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
     tar -xvf /usr/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr && \
     rm -rf /usr/apache-maven-${MAVEN_VERSION}-bin.tar.gz
