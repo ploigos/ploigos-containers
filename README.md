@@ -49,6 +49,11 @@ Required Capabilities for rootless container building:
 * SETUID
 * SETGID
 
+## ploigos-tool-cpp
+[![ploigos-tool-cpp](https://img.shields.io/badge/quay.io-ploigos--tool--cpp-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-cpp)
+
+Defines a tools container that has tools for working with C++.
+
 ## ploigos-tool-helm
 [![ploigos-tool-helm](https://img.shields.io/badge/quay.io-ploigos--tool--helm-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-helm)
 
@@ -167,6 +172,7 @@ podman build --tag ploigos-jenkins-init                                         
 podman build --tag ploigos-tool-argocd      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-argocd
 podman build --tag ploigos-tool-config-lint --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-config-lint
 podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-containers
+podman build --tag ploigos-tool-gcc         --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-gcc
 podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
 podman build --tag ploigos-tool-java        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java
 podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-tool-java       ploigos-tool-maven
