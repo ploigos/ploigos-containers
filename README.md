@@ -72,6 +72,11 @@ Defines a maven container image. Built from `ploigos-tool-java`.
 
 Defines a Maven JKube container image. Built from `ploigos-tool-maven`.
 
+## ploigos-tool-quarkus-native
+[![ploigos-tool-quarkus-native](https://img.shields.io/badge/quay.io-ploigos--tool--quarkus--native-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-quarkus-native)
+
+Defines a Maven Quarkus native container image. Built from `ploigos-tool-maven`.
+
 ## ploigos-tool-javascript
 [![ploigos-tool-javascript](https://img.shields.io/badge/quay.io-ploigos--tool--javascript-lightgrey?logo=open-containers-initiative)](https://quay.io/repository/ploigos/ploigos-tool-javascript)
 
@@ -145,6 +150,8 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 * ploigos-tool-jkube
   * .java8.ubi8
   * .java11.ubi8 (default)
+* ploigos-tool-quarkus-native
+  * .java17.ubi8 (default)
 * ploigos-tool-javascript
   * ubi8
 * ploigos-tool-openscap
@@ -160,21 +167,22 @@ to kick off which will build, test, publish the images (that can) to [quay.io/pl
 The following commands can be used for building these images locally.
 
 ```
-podman build --tag ploigos-base                                                            ploigos-base
-podman build --tag ploigos-ci-agent-jenkins --build-arg BASE_IMAGE=ploigos-tool-java       ploigos-ci-agent-jenkins
-podman build --tag ploigos-jenkins                                                         ploigos-jenkins
-podman build --tag ploigos-jenkins-init                                                    ploigos-jenkins-init
-podman build --tag ploigos-tool-argocd      --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-argocd
-podman build --tag ploigos-tool-config-lint --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-config-lint
-podman build --tag ploigos-tool-containers  --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-containers
-podman build --tag ploigos-tool-helm        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
-podman build --tag ploigos-tool-java        --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java
-podman build --tag ploigos-tool-maven       --build-arg BASE_IMAGE=ploigos-tool-java       ploigos-tool-maven
-podman build --tag ploigos-tool-javascript  --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-javascript
-podman build --tag ploigos-tool-jkube       --build-arg BASE_IMAGE=ploigos-tool-maven      ploigos-tool-jkube
-podman build --tag ploigos-tool-openscap    --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
-podman build --tag ploigos-tool-autogov     --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
-podman build --tag ploigos-tool-sonar       --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
+podman build --tag ploigos-base                                                               ploigos-base
+podman build --tag ploigos-ci-agent-jenkins    --build-arg BASE_IMAGE=ploigos-tool-java       ploigos-ci-agent-jenkins
+podman build --tag ploigos-jenkins                                                            ploigos-jenkins
+podman build --tag ploigos-jenkins-init                                                       ploigos-jenkins-init
+podman build --tag ploigos-tool-argocd         --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-argocd
+podman build --tag ploigos-tool-config-lint    --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-config-lint
+podman build --tag ploigos-tool-containers     --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-containers
+podman build --tag ploigos-tool-helm           --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-helm
+podman build --tag ploigos-tool-java           --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-java
+podman build --tag ploigos-tool-maven          --build-arg BASE_IMAGE=ploigos-tool-java       ploigos-tool-maven
+podman build --tag ploigos-tool-javascript     --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-javascript
+podman build --tag ploigos-tool-jkube          --build-arg BASE_IMAGE=ploigos-tool-maven      ploigos-tool-jkube
+podman build --tag ploigos-tool-quarkus-native --build-arg BASE_IMAGE=ploigos-tool-maven      ploigos-tool-quarkus-native
+podman build --tag ploigos-tool-openscap       --build-arg BASE_IMAGE=ploigos-tool-containers ploigos-tool-openscap
+podman build --tag ploigos-tool-autogov        --build-arg BASE_IMAGE=ploigos-autogov         ploigos-tool-autogov
+podman build --tag ploigos-tool-sonar          --build-arg BASE_IMAGE=ploigos-base            ploigos-tool-sonar
 podman build --tag argocd-repo-server-sops  argocd-repo-server-sops -f ./Containerfile.ubi8
 ```
 
