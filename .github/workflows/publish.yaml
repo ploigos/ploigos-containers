@@ -1625,7 +1625,7 @@ jobs:
           docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
             "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
              cd jkube/quickstarts/maven/spring-boot && \
-             git checkout v1.3.0 &&
+             git checkout v1.10.1 &&
              mvn package k8s:build -Pkubernetes && \
              (podman images | grep spring-boot)"
 
@@ -1757,7 +1757,7 @@ jobs:
           docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
             "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
              cd jkube/quickstarts/maven/spring-boot && \
-             git checkout v1.3.0 &&
+             git checkout v1.10.1 &&
              mvn package k8s:build -Pkubernetes && \
              (podman images | grep spring-boot)"
 
@@ -1889,7 +1889,7 @@ jobs:
           docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
             "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
              cd jkube/quickstarts/maven/spring-boot && \
-             git checkout v1.3.0 &&
+             git checkout v1.10.1 &&
              mvn package k8s:build -Pkubernetes && \
              (podman images | grep spring-boot)"
 
