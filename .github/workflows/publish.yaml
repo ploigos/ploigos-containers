@@ -12,6 +12,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   GITHUB_EVENT_REPOSITORY_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   GITHUB_EVENT_NUMBER: ${{ github.event.number }}
@@ -19,23 +23,12 @@ env:
   REGISTRY_REPOSITORY: ${{ secrets.REGISTRY_REPOSITORY }}
 
 jobs:
-  cancel-previous:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.5.0
-        with:
-          access_token: ${{ github.token }}
-
 ## UBI8 ##
 
   #####################
   # ploigos-base_ubi8 #
   #####################
   ploigos-base_ubi8:
-    needs:
-    - cancel-previous
-
     runs-on: ubuntu-latest
 
     env:
@@ -459,9 +452,6 @@ jobs:
   # ploigos-jenkins-init #
   ########################
   ploigos-jenkins-init:
-    needs:
-    - cancel-previous
-
     runs-on: ubuntu-latest
 
     env:
@@ -2034,9 +2024,6 @@ jobs:
   # ploigos-jenkins #
   ###################
   ploigos-jenkins:
-    needs:
-    - cancel-previous
-
     runs-on: ubuntu-latest
 
     env:
