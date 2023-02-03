@@ -58,6 +58,6 @@ if [[ ${IMAGE_TAG_FLAVOR} ]] ; then
 fi
 
 # set output for future github action steps
-echo ::set-output name=version::${VERSION}${IMAGE_TAG_FLAVOR}
-echo ::set-output name=tags::${TAGS}
-echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+echo "version=${VERSION}${IMAGE_TAG_FLAVOR}" >> $GITHUB_OUTPUT
+echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
