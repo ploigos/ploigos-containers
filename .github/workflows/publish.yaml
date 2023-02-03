@@ -1522,6 +1522,9 @@ jobs:
   # ploigos-tool-jkube_java8_ubi8 #
   #################################
   ploigos-tool-jkube_java8_ubi8:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
     needs:
     - ploigos-tool-maven_java8_ubi8
 
@@ -1654,6 +1657,9 @@ jobs:
   # ploigos-tool-jkube_java11_ubi8 #
   ##################################
   ploigos-tool-jkube_java11_ubi8:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
     needs:
     - ploigos-tool-maven_java11_ubi8
 
@@ -1786,6 +1792,9 @@ jobs:
   # ploigos-tool-jkube_java17_ubi8 #
   ##################################
   ploigos-tool-jkube_java17_ubi8:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
     needs:
     - ploigos-tool-maven_java17_ubi8
 
