@@ -1,0 +1,35 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi9
+ARG ARGOCD_VERSION=v2.5.4
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG ARGOCD_VERSION
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with ArgoCD cli"
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-argocd" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - ArgoCD" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,argocd" \
+    com.redhat.component="ploigos-tool-argocd-container"
+
+USER root
+
+# TODO: Currently (7/29/2020) podman does not support passing arguments into environment variables
+#       see https://github.com/containers/buildah/issues/2345
+#       Once this is resolved, store the path to the argocd cli in argument so it can be overwritten
+#		without rebuilding the image.
+RUN curl -L https://github.com/argoproj/argo-cd/releases/download/${ARGOCD_VERSION}/argocd-linux-amd64 -o /usr/bin/argocd && \
+    chmod 775 /usr/bin/argocd && chown 1001:0 /usr/bin/argocd
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}

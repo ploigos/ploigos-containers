@@ -1,0 +1,46 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-java-8:latest.ubi9
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+
+# labels
+ENV DESCRIPTION="Ploigos CI agent for Jenkins"
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-ci-agent-jenkins" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - CI Agent - Jenkins" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,jenkins,jnlp" \
+    com.redhat.component="ploigos-ci-agent-jenkins-container"
+
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+USER root
+
+# Copy the entrypoint
+ADD contrib/bin/* /usr/local/bin/
+
+# Install jenkins agent
+RUN chmod 775 /usr/bin && \
+    chmod 775 /usr/share/man/man1 && \
+    chmod 775 /usr/lib/jvm && \
+    unlink /usr/lib/jvm/jre && \
+    unlink /usr/lib/jvm/java && \
+    mkdir -p /var/lib/origin && \
+    chmod 775 /var/lib/origin &&\
+    chmod 550 /usr/local/bin/run-jnlp-client && \
+    chown 1001:0 /usr/local/bin/run-jnlp-client
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
+# # run the base entry point which will then execute the Jenkins JNLP client
+ENTRYPOINT [ "/ploigos-base-entrypoint.sh", "/usr/local/bin/run-jnlp-client" ]
