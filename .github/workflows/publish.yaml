@@ -2662,3 +2662,2545 @@ jobs:
 
       - name: Image Digest 🔖
         run: echo ${{ steps.image_build.outputs.digest }}
+
+## UBI9 ##
+
+  #####################
+  # ploigos-base_ubi9 #
+  #####################
+  ploigos-base_ubi9:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-base
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-base
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-base:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS:
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Test python3 installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} python3 --version
+          echo "Test pip3 installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} pip3 --version
+          echo "Test ploigos-step-runner is installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} pip show ploigos-step-runner
+          echo "Test psr CLI works"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} psr --help
+          echo "Test oc installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} oc version
+          echo "Test git installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} git version
+          echo "Test yq installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} yq --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #######################################
+  # ploigos-ci-agent-jenkins_java8_ubi9 #
+  #######################################
+  ploigos-ci-agent-jenkins_java8_ubi9:
+    needs:
+    - ploigos-tool-java_java8_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-ci-agent-jenkins
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest.java8.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java8_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java8.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ########################################
+  # ploigos-ci-agent-jenkins_java11_ubi9 #
+  ########################################
+  ploigos-ci-agent-jenkins_java11_ubi9:
+    needs:
+    - ploigos-tool-java_java11_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-ci-agent-jenkins
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest.java11.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java11_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java11.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ########################################
+  # ploigos-ci-agent-jenkins_java17_ubi9 #
+  ########################################
+  ploigos-ci-agent-jenkins_java17_ubi9:
+    needs:
+    - ploigos-tool-java_java17_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-ci-agent-jenkins
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-ci-agent-jenkins
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-ci-agent-jenkins:latest.java17.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java17_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java17.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} run-jnlp-client
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ########################
+  # ploigos-jenkins-init #
+  ########################
+  ploigos-jenkins-init_ubi9:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-jenkins-init
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-jenkins-init
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-jenkins-init:latest
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} ploigos-jenkins-plugins/ansicolor.jpi ploigos-jenkins-plugins/openshift-client.jpi"
+          docker run --entrypoint=ls ${{ env.IMAGE_TAG_LOCAL }} ploigos-jenkins-plugins/ansicolor.jpi ploigos-jenkins-plugins/openshift-client.jpi
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ############################
+  # ploigos-tool-argocd_ubi9 #
+  ############################
+  ploigos-tool-argocd_ubi9:
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-argocd
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-argocd
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-argocd:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify ArgoCD installed"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} argocd version --client
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #################################
+  # ploigos-tool-config-lint_ubi9 #
+  #################################
+  ploigos-tool-config-lint_ubi9:
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-config-lint
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-config-lint
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-config-lint:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} config-lint --version"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} config-lint --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##########################
+  # ploigos-tool-helm_ubi9 #
+  ##########################
+  ploigos-tool-helm_ubi9:
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-helm
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-helm
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-helm:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Check helm is entry point"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm --help
+
+          echo "Check helm version (this value needs to be updated if default value in container is updated)"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm version
+
+          echo "Check helm-secrets plugin is installed in expected location"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} ls /helm/plugins/helm-secrets
+
+          echo "Check that helm-secrets plugin is installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} helm secrets --help
+
+          echo "Check that helm-secrets plugin is installed when running as random user"
+          docker run -u 10010042 ${{ env.IMAGE_TAG_LOCAL }} helm secrets --help
+
+          echo "Check that sops is installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} sops --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ################################
+  # ploigos-tool-java_java8_ubi9 #
+  ################################
+  ploigos-tool-java_java8_ubi9 :
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-java
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-java
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-java:latest.java8.ubi9
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java8.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: |
+            BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+            JAVA_VERSION=1.8.0
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #################################
+  # ploigos-tool-java_java11_ubi9 #
+  #################################
+  ploigos-tool-java_java11_ubi9 :
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-java
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-java
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-java:latest.java11.ubi9
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java11.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: |
+            BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+            JAVA_VERSION=11
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #################################
+  # ploigos-tool-java_java17_ubi9 #
+  #################################
+  ploigos-tool-java_java17_ubi9 :
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-java
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-java
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-java:latest.java17.ubi9
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java17.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: |
+            BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+            JAVA_VERSION=17
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #################################
+  # ploigos-tool-maven_java8_ubi9 #
+  #################################
+  ploigos-tool-maven_java8_ubi9:
+    needs:
+    - ploigos-tool-java_java8_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-maven
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-maven
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest.java8.ubi9
+      IMAGE_TAG_FLAVOR: .java8.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java8_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##################################
+  # ploigos-tool-maven_java11_ubi9 #
+  ##################################
+  ploigos-tool-maven_java11_ubi9:
+    needs:
+    - ploigos-tool-java_java11_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-maven
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-maven
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest.java11.ubi9
+      IMAGE_TAG_FLAVOR: .java11.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java11_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##################################
+  # ploigos-tool-maven_java17_ubi9 #
+  ##################################
+  ploigos-tool-maven_java17_ubi9:
+    needs:
+    - ploigos-tool-java_java17_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-maven
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-maven
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-maven:latest.java17.ubi9
+      IMAGE_TAG_FLAVOR: .java17.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java17_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #################################
+  # ploigos-tool-jkube_java8_ubi9 #
+  #################################
+  ploigos-tool-jkube_java8_ubi9:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
+    needs:
+    - ploigos-tool-maven_java8_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-jkube
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-jkube
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-jkube:latest.java8.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-maven
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-maven_java8_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java8.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test podman socket created"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "ls /home/ploigos/podman.sock"
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test can run jkube build"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
+            "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
+             cd jkube/quickstarts/maven/spring-boot && \
+             git checkout v1.10.1 &&
+             mvn package k8s:build -Pkubernetes && \
+             (podman images | grep spring-boot)"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##################################
+  # ploigos-tool-jkube_java11_ubi9 #
+  ##################################
+  ploigos-tool-jkube_java11_ubi9:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
+    needs:
+    - ploigos-tool-maven_java11_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-jkube
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-jkube
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-jkube:latest.java11.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-maven
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-maven_java11_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java11.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test podman socket created"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "ls /home/ploigos/podman.sock"
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test can run jkube build"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
+            "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
+             cd jkube/quickstarts/maven/spring-boot && \
+             git checkout v1.10.1 &&
+             mvn package k8s:build -Pkubernetes && \
+             (podman images | grep spring-boot)"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##################################
+  # ploigos-tool-jkube_java17_ubi9 #
+  ##################################
+  ploigos-tool-jkube_java17_ubi9:
+    # job disabled due to https://github.com/ploigos/ploigos-containers/issues/112
+    if: ${{ false }}
+
+    needs:
+    - ploigos-tool-maven_java17_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-jkube
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-jkube
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-jkube:latest.java17.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-maven
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-maven_java17_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java17.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Verify java installed"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+          echo "Verify maven installed"
+          docker run -u 1001  ${{ env.IMAGE_TAG_LOCAL }} mvn --version
+
+          echo "Verify can create file in ~/.m2"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "mkdir -p ~/.m2 && touch ~/.m2/test-settings.xml"
+
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test podman socket created"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c "ls /home/ploigos/podman.sock"
+
+          # NOTE: using --privilaged here, but in kubernetes we give it the specific capabilities
+          echo "test can run jkube build"
+          docker run -u 1001 --privileged ${{ env.IMAGE_TAG_LOCAL }} /bin/bash -c \
+            "cd /home/ploigos && git clone https://github.com/eclipse/jkube.git && \
+             cd jkube/quickstarts/maven/spring-boot && \
+             git checkout v1.10.1 &&
+             mvn package k8s:build -Pkubernetes && \
+             (podman images | grep spring-boot)"
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ###########################
+  # ploigos-tool-sonar_ubi9 #
+  ###########################
+  ploigos-tool-sonar_ubi9:
+    needs:
+    - ploigos-tool-javascript_java11_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-sonar
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-sonar
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-sonar:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-tool-javascript
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-javascript_java11_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} sonar-scanner --version"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} sonar-scanner --version
+          echo "Running: docker run ${{ env.IMAGE_TAG_LOCAL }} node -v"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} node -v
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #############################
+  # ploigos-tool-autogov_ubi9 #
+  #############################
+  ploigos-tool-autogov_ubi9:
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-autogov
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-autogov
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-autogov:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Check rekor and opa binaries exists"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} rekor --help
+          echo "Check opa binary exists"
+          docker run ${{ env.IMAGE_TAG_LOCAL }} opa --help
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ################################
+  # ploigos-tool-containers_ubi9 #
+  ################################
+  ploigos-tool-containers_ubi9:
+    needs:
+    - ploigos-base_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-containers
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-containers
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-containers:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-base
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-base_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "test skopeo"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} skopeo --version
+
+          echo "test podman"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} podman --version
+
+          echo "test buildah"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} buildah --version
+
+          echo "test s2i"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} s2i version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ##############################
+  # ploigos-tool-openscap_ubi9 #
+  ##############################
+  ploigos-tool-openscap_ubi9:
+    needs:
+    - ploigos-tool-containers_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-openscap
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-openscap
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-openscap:latest.ubi9
+      IMAGE_TAG_FLAVOR: .ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+      BASE_IMAGE_NAME: ploigos-tool-containers
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-containers_ubi9.outputs.version }}
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "test oscap"
+          docker run -u 1001 ${{ env.IMAGE_TAG_LOCAL }} oscap --version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  ######################################
+  # ploigos-tool-javascript_java8_ubi9 #
+  ######################################
+  ploigos-tool-javascript_java8_ubi9:
+    needs:
+    - ploigos-tool-java_java8_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-javascript
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-javascript
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-javascript:latest.java8.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java8_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java8.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: false
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} javascript cli tools"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} npm --help
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} node --help
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} java -version"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}
+
+  #######################################
+  # ploigos-tool-javascript_java11_ubi9 #
+  #######################################
+  ploigos-tool-javascript_java11_ubi9:
+    needs:
+    - ploigos-tool-java_java11_ubi9
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_CONTEXT: ./ploigos-tool-javascript
+      IMAGE_FILE: Containerfile.ubi9
+      IMAGE_NAME: ploigos-tool-javascript
+      IMAGE_TAG_LOCAL: localhost:5000/${{ secrets.REGISTRY_REPOSITORY }}/ploigos-tool-javascript:latest.java11.ubi9
+      BASE_IMAGE_NAME: ploigos-tool-java
+      BASE_IMAGE_VERSION: ${{ needs.ploigos-tool-java_java11_ubi9.outputs.version }}
+      IMAGE_TAG_FLAVOR: .java11.ubi9
+      IMAGE_IS_DEFAULT_FLAVOR: true
+
+    services:
+      registry:
+        image: registry:2
+        ports:
+        - 5000:5000
+
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3.3.0
+
+      - name: Determine Image Version and Tags ⚙️
+        id: prep
+        run: ${GITHUB_WORKSPACE}/.github/scripts/determine-image-version.sh
+
+      - name: Version 📌
+        run: echo ${{ steps.prep.outputs.version }}
+
+      - name: Image Tags 🏷
+        run: echo ${{ steps.prep.outputs.tags }}
+
+      - name: Set up QEMU 🧰
+        uses: docker/setup-qemu-action@v2.1.0
+
+      - name: Set up Docker Buildx 🧰
+        uses: docker/setup-buildx-action@v2.4.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers 🗃
+        uses: actions/cache@v3.2.4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Image 🛠
+        id: image_build
+        uses: docker/build-push-action@v4.0.0
+        env:
+          IMAGE_BUILD_ARGS: BASE_IMAGE=${{ secrets.REGISTRY_URI }}/${{ secrets.REGISTRY_REPOSITORY }}/${{ env.BASE_IMAGE_NAME }}:${{ env.BASE_IMAGE_VERSION }}
+        with:
+          context: ${{ env.IMAGE_CONTEXT }}
+          file: ${{ env.IMAGE_CONTEXT }}/${{ env.IMAGE_FILE }}
+          build-args: ${{ env.IMAGE_BUILD_ARGS }}
+          push: true
+          tags: ${{ env.IMAGE_TAG_LOCAL }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=${{ github.event.repository.license.name }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Test Image 🧪
+        run: |
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} javascript cli tools"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} npm --help
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} node --help
+          echo "Running: docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} java -version"
+          docker run --entrypoint=which ${{ env.IMAGE_TAG_LOCAL }} java -version
+
+      - name: Login to External Registry 🔑
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ secrets.REGISTRY_URI }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push to External Registry 🔺
+        id: push
+        run: |
+          docker pull ${{ env.IMAGE_TAG_LOCAL }}
+
+          TAGS=${{ steps.prep.outputs.tags }}
+          for TAG in ${TAGS//,/ }; do
+            docker tag ${{ env.IMAGE_TAG_LOCAL }} ${TAG}
+            docker push ${TAG}
+          done
+
+      - name: Image Digest 🔖
+        run: echo ${{ steps.image_build.outputs.digest }}

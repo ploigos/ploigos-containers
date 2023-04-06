@@ -1,0 +1,90 @@
+ARG BASE_IMAGE=registry.access.redhat.com/ubi9:latest
+ARG PLOIGOS_USER_NAME=ploigos
+ARG PLOIGOS_USER_UID=1001
+ARG PLOIGOS_USER_GID=0
+ARG PLOIGOS_HOME_DIR=/home/ploigos
+ARG PLOIGOS_SOURCE=ploigos-step-runner==2.0.0rc4
+ARG OPENSHIFT_CLI_VERSION=4.12
+ARG YQ_VERSION=3.4.1
+
+##############################################
+# Stage 1 : Retrieive oc cli
+##############################################
+FROM quay.io/openshift/origin-cli:$OPENSHIFT_CLI_VERSION as origin-cli
+
+##############################################
+# Stage 2 : Build ploigos-base
+##############################################
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_NAME
+ARG PLOIGOS_USER_UID
+ARG PLOIGOS_USER_GID
+ARG PLOIGOS_HOME_DIR
+ARG PLOIGOS_SOURCE
+ARG YQ_VERSION
+COPY --from=origin-cli /usr/bin/oc /usr/bin/oc
+COPY --from=origin-cli /usr/bin/kubectl /usr/bin/kubectl
+
+# arguments
+# NOTE: arguments used in sub stage have to be in that stage (at least when building with docker, buildah doesn't seem to have a problem either way)
+ARG SOPS_RPM="https://github.com/mozilla/sops/releases/download/v3.6.1/sops-3.6.1-1.x86_64.rpm"
+
+# labels
+ENV DESCRIPTION="Ploigos base container."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-base" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Base" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos" \
+    com.redhat.component="ploigos-base-container"
+
+ENV HOME=/home/ploigos \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+USER root
+
+# Install JQ
+RUN curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/bin/jq && \
+    chmod +x /usr/bin/jq
+
+# Install YQ
+RUN curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -o /usr/bin/yq &&\
+    chmod +x /usr/bin/yq
+
+# Install packages
+RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python39 python3-pip python3-pip-wheel python3-setuptools python3-devel ${SOPS_RPM} gnupg2" && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# Configure Python
+RUN alternatives --install /usr/local/bin/python python /usr/bin/python3 2 && \
+    python -m pip install --no-cache-dir --upgrade pip
+
+# Install Ploigos step runner python library
+RUN python -m pip install --no-cache-dir --upgrade ${PLOIGOS_SOURCE}
+
+# Configure ploigos user
+RUN useradd ploigos --uid ${PLOIGOS_USER_UID} --gid ${PLOIGOS_USER_GID} --home-dir ${PLOIGOS_HOME_DIR} --create-home --shell /sbin/nologin && \
+    chown -R ${PLOIGOS_USER_UID}:${PLOIGOS_USER_GID} ${PLOIGOS_HOME_DIR} && \
+    chmod -R g+w ${PLOIGOS_HOME_DIR}
+
+# Allow root(0) group to run update-ca-trust extract
+RUN chmod -R g+w /etc/pki/ca-trust/extracted
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
+# set entrypoint
+COPY ploigos-base-entrypoint.sh /
+ENTRYPOINT [ "/ploigos-base-entrypoint.sh" ]

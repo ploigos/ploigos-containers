@@ -1,0 +1,67 @@
+# This image is based on the following Dockerfiles:
+# https://catalog.redhat.com/software/containers/rhel8/buildah/5dca3d76dd19c71643b226d5?container-tabs=dockerfile
+# https://github.com/containers/buildah/blob/master/contrib/buildahimage/stable/Dockerfile
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi9
+ARG S2I_VERSION=v1.3.5
+ARG S2I_BUILD_VERSION=c5a05362
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG S2I_VERSION
+ARG S2I_BUILD_VERSION
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with container tools, skopeo, buildah, podman, s2i."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-containers" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - containers" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,podman,skopeo,buildah" \
+    com.redhat.component="ploigos-tool-containers-container"
+
+# NOTE This image must run priviliged
+USER root
+
+# update and install packages
+# NOTE: need to reinstall shadow-utils because of
+# * https://github.com/containers/buildah/issues/3053#issuecomment-790031931
+RUN INSTALL_PKGS="buildah podman skopeo" && \
+    dnf update -y --allowerasing --nobest && \
+    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
+    dnf reinstall -y shadow-utils && \
+    dnf clean all && \
+    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+
+# install s2i
+WORKDIR /usr/local/bin
+RUN curl -L https://github.com/openshift/source-to-image/releases/download/${S2I_VERSION}/source-to-image-${S2I_VERSION}-${S2I_BUILD_VERSION}-linux-amd64.tar.gz --output s2i.tar.gz && \
+    tar xzf ./s2i.tar.gz && \
+    rm ./s2i.tar.gz && \
+    chmod 775 ./s2i && \
+    chown ${PLOIGOS_USER_UID}:0 ./s2i
+WORKDIR /
+
+# NOTE: don't know why this is needed but the permisisons on /usr/local/bin keep getting messed up
+RUN chmod a+rx /usr/local/bin
+
+# allow for subgid and subuid to be set at runtime for random UIDs
+# needed to allow for buildah to call newgidmap and newuidmap
+RUN chmod g+rw /etc/subgid /etc/subuid
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
+
+# set up environment variables for use by podman/buildah/skopeo to be able to run as rootless
+ENV _BUILDAH_STARTED_IN_USERNS="" BUILDAH_ISOLATION=chroot STORAGE_DRIVER="vfs"
+
+# set custom entrypoint which also calls the base entrypoint
+COPY ploigos-tool-containers-entrypoint.sh /
+ENTRYPOINT [ "/ploigos-tool-containers-entrypoint.sh" ]

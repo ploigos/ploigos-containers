@@ -1,0 +1,50 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi9
+ARG HELM_PLUGINS_DIR=/helm/plugins
+ARG HELM_VERSION=v3.11.1
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION=v4.4.2
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+ARG HELM_VERSION
+ARG HELM_PLUGINS_DIR
+ARG HELM_PLUGIN_HELM_SECRETS_VERSION
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with helm."
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-helm" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - Helm" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,helm" \
+    com.redhat.component="ploigos-tool-helm-container"
+
+USER root
+
+# download HELM and install in /usr/local/bin
+RUN curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o helm-${HELM_VERSION}-linux-amd64.tar.gz \
+    && tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz \
+    && mv linux-amd64/helm /usr/local/bin/helm
+
+# install the sops plugin for helm
+# NOTE: the trick of setting and unsetting XDG_DATA_HOME seems to be documented no where but
+#	also seems to be the only way to get the plugins to actually install in the right playce
+#	Found trick here: https://jenkins-x.io/community/labs/enhancements/proposals/4/readme/#231-quick-and-dirty-implementation
+RUN mkdir -p ${HELM_PLUGINS_DIR} && \
+    chmod g+rwx ${HELM_PLUGINS_DIR}
+ENV HELM_PLUGINS=${HELM_PLUGINS_DIR}
+RUN chmod a+rwx $HOME
+RUN export XDG_DATA_HOME="/" \
+    && helm plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
+    && unset XDG_DATA_HOME
+RUN chmod -R +r ${HELM_PLUGINS_DIR}
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}

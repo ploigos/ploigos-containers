@@ -1,0 +1,33 @@
+ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi9
+
+FROM $BASE_IMAGE
+ARG PLOIGOS_USER_UID
+
+# labels
+ENV DESCRIPTION="Ploigos tool container with config-ling"
+LABEL \
+    maintainer="Ploigos <ploigos@redhat.com>" \
+    name="ploigos/ploigos-tool-config-lint" \
+    summary="$DESCRIPTION" \
+    description="$DESCRIPTION" \
+    License="GPLv2+" \
+    architecture="x86_64" \
+    io.k8s.display-name="Ploigos - Tool - config-lint" \
+    io.k8s.description="$DESCRIPTION" \
+    io.openshift.expose-services="" \
+    io.openshift.tags="ploigos,config-lint" \
+    com.redhat.component="ploigos-tool-config-lint-container"
+
+USER root
+
+WORKDIR /usr/local/bin
+RUN curl -L https://github.com/stelligent/config-lint/releases/latest/download/config-lint_Linux_x86_64.tar.gz --output config-lint.tar.gz && \
+    tar xzf ./config-lint.tar.gz && \
+    rm ./config-lint.tar.gz && \
+    chmod 775 ./config-lint && \
+    chown 1001:0 ./config-lint
+
+# may not actually be able to run as this user at runtime
+# but platforms like OpenShift will still respect users home directory
+# so still worth setting
+USER ${PLOIGOS_USER_UID}
