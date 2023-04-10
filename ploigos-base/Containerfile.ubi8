@@ -66,9 +66,8 @@ RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python39 python3-p
     rm -rf /var/cache /var/log/dnf* /var/log/yum.*
 
 # Configure Python
-RUN alternatives --set python /usr/bin/python3 && \
+RUN alternatives --set python /usr/bin/python3.9 && \
     python -m pip install --no-cache-dir --upgrade pip
-
 # Install Ploigos step runner python library
 RUN python -m pip install --no-cache-dir --upgrade ${PLOIGOS_SOURCE}
 
