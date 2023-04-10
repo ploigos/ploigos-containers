@@ -38,6 +38,7 @@ RUN curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -o helm-
 RUN mkdir -p ${HELM_PLUGINS_DIR} && \
     chmod g+rwx ${HELM_PLUGINS_DIR}
 ENV HELM_PLUGINS=${HELM_PLUGINS_DIR}
+RUN chmod a+rwx $HOME
 RUN export XDG_DATA_HOME="/" \
     && helm plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_PLUGIN_HELM_SECRETS_VERSION} \
     && unset XDG_DATA_HOME
