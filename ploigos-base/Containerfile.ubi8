@@ -59,7 +59,7 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_l
     chmod +x /usr/bin/yq
 
 # Install packages
-RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python36 python3-pip python3-pip-wheel python3-setuptools python36-devel ${SOPS_RPM} gnupg2" && \
+RUN INSTALL_PKGS="gettext git rsync tar unzip which zip bzip2 python39 python3-pip python3-pip-wheel python3-setuptools python3-devel ${SOPS_RPM} gnupg2" && \
     dnf update -y --allowerasing --nobest && \
     dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
     dnf clean all && \
