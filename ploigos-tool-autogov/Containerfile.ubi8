@@ -1,11 +1,13 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-base:latest.ubi8
 ARG REKOR_VERSION=e63fe717c810657c270edfb964aef10969e7f210
 ARG OPA_VERSION=v0.29.4
+ARG GOLANG_VERSION=1.22.4
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
 ARG REKOR_VERSION
 ARG OPA_VERSION
+ARG GOLANG_VERSION
 
 # labels
 ENV DESCRIPTION="Ploigos tool container with Rekor and Open Policy Agent."
@@ -27,15 +29,13 @@ ENV LANG=en_US.UTF-8 \
 
 USER root
 
-# Copy the entrypoint
-ADD contrib/centos.repo /etc/yum.repos.d/
+# Install GoLang
+RUN curl -L https://go.dev/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz -o /tmp/golang.tar.gz && \
+    tar -C /usr/local -xzf /tmp/golang.tar.gz
 
-# update and install packages
-RUN INSTALL_PKGS="golang" && \
-    dnf update -y --allowerasing --nobest && \
-    dnf install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    dnf clean all && \
-    rm -rf /var/cache /var/log/dnf* /var/log/yum.*
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=$HOME/go
+ENV PATH=$PATH:$GOPATH/bin
 
 # Install rekor
 # NOTE: better way to install, except as of 7/21/21 only v0.2.0 is released and it doesnt work with PSR
