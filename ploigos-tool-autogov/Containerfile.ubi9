@@ -27,9 +27,6 @@ ENV LANG=en_US.UTF-8 \
 
 USER root
 
-# Copy the entrypoint
-ADD contrib/centos.repo /etc/yum.repos.d/
-
 # update and install packages
 RUN INSTALL_PKGS="golang" && \
     dnf update -y --allowerasing --nobest && \
