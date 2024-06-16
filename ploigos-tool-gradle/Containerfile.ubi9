@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-java-8:latest.ubi9
 ARG GRADLE_VERSION=8.8
+ARG PLOIGOS_USER_GID=0
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
