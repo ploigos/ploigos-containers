@@ -26,7 +26,7 @@ LABEL \
 USER root
 
 # Install Gradle
-RUN wget -qLO /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" && \
+RUN curl -L "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip && \
     mkdir /opt/gradle && \
     unzip -d /opt/gradle /tmp/gradle.zip && \
     rm /tmp/gradle.zip && \
