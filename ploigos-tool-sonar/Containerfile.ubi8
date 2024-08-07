@@ -2,8 +2,8 @@ ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-javascript:latest.ubi8
 
 FROM $BASE_IMAGE
 ARG PLOIGOS_USER_UID
-ARG SONAR_CLI=sonar-scanner-cli-4.4.0.2170-linux
-ARG SONAR=sonar-scanner-4.4.0.2170-linux
+ARG SONAR_CLI=sonar-scanner-cli-6.1.0.4477-linux-x64
+ARG SONAR=sonar-scanner-6.1.0.4477-linux-x64
 
 # labels
 ENV DESCRIPTION="Ploigos tool container with Sonar CLI."
