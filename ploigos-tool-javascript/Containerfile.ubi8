@@ -2,7 +2,7 @@
 #       The npm selenium web driver package requires java in order to execute
 #       selenium tests. For this reason, java is used as the base image
 ARG BASE_IMAGE=quay.io/ploigos/ploigos-tool-java:latest.java11.ubi8
-ARG NODEJS_STREAM=12
+ARG NODEJS_STREAM=20
 ARG NODEJS_PROFILE=common
 
 FROM $BASE_IMAGE
